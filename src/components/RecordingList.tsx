@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { Recording } from "../util/db";
+import { RecordingItem } from "./RecordingItem";
 
 interface RecordingListProps {
   recordings: Recording[];
@@ -36,45 +36,14 @@ export const RecordingList = ({
             <div className="no-recordings">暂无录音</div>
           ) : (
             recordings.map((recording) => (
-              <div key={recording.id} className="recording-item">
-                <div className="recording-info">
-                  <span className="recording-date">
-                    {new Date(recording.date).toLocaleString()}
-                  </span>
-                  <span className="recording-duration">
-                    {Math.floor(recording.duration / 60000)}:
-                    {Math.floor((recording.duration % 60000) / 1000)
-                      .toString()
-                      .padStart(2, "0")}
-                  </span>
-                </div>
-                <div className="recording-actions">
-                  <button
-                    className={`play-btn ${playingId === recording.id ? 'playing' : ''}`}
-                    onClick={() => onPlayToggle(recording)}
-                  >
-                    {playingId === recording.id ? '停止' : '播放'}
-                  </button>
-                  <button
-                    className="delete-btn"
-                    onClick={async () => {
-                      if (recording.id) {
-                        await onDelete(recording.id);
-                      }
-                    }}
-                  >
-                    删除
-                  </button>
-                </div>
-                {playingId === recording.id && (
-                  <div className="play-progress-bar">
-                    <div 
-                      className="play-progress" 
-                      style={{ width: `${playProgress}%` }}
-                    />
-                  </div>
-                )}
-              </div>
+              <RecordingItem
+                key={recording.id}
+                recording={recording}
+                isPlaying={playingId === recording.id}
+                playProgress={playingId === recording.id ? playProgress : 0}
+                onPlayToggle={onPlayToggle}
+                onDelete={onDelete}
+              />
             ))
           )}
         </div>

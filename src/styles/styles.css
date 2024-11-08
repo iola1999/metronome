@@ -32,8 +32,9 @@ body {
     padding: 1.5rem;
     border-radius: 2rem;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    width: 95%;
-    max-width: 450px;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
     margin-top: -5vh;
 }
 
@@ -316,8 +317,9 @@ button:hover {
     border-radius: 1rem;
     width: 90%;
     max-width: 500px;
-    max-height: 80vh;
+    max-height: 70vh;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .modal-header {
@@ -344,16 +346,26 @@ button:hover {
 .recording-item {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 1rem;
-    background-color: var(--background-color);
-    border-radius: 0.5rem;
+    padding: 12px 16px;
+    width: 100%;
+    min-height: 72px;
+    box-sizing: border-box;
 }
 
 .recording-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
+    flex-grow: 1;
+    margin-left: 12px;
+}
+
+.recording-title {
+    font-size: 1rem;
+    margin-bottom: 4px;
+    color: #333;
+}
+
+.recording-metadata {
+    font-size: 0.9rem;
+    color: #666;
 }
 
 .recording-date {
@@ -384,20 +396,30 @@ button:hover {
   display: flex;
   justify-content: center;
   z-index: 100;
+  padding: 0 16px;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .recording-main-controls {
   display: flex;
   gap: 16px;
   align-items: center;
+  justify-content: center;
   background: rgba(255, 255, 255, 0.95);
   padding: 12px 24px;
   border-radius: 50px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   height: 64px;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
 .record-btn, .show-recordings-btn {
+  flex: 1;
+  min-width: 120px;
+  max-width: 160px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -409,7 +431,6 @@ button:hover {
   height: 40px;
   line-height: 40px;
   white-space: nowrap;
-  min-width: 100px;
   transition: all 0.3s ease;
   margin: 0;
   vertical-align: middle;
@@ -511,4 +532,251 @@ button:hover {
   100% {
     transform: scale(1);
   }
+}
+
+/* 录音项样式 */
+.recording-item {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.recording-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.recording-item.playing {
+  background: linear-gradient(135deg, #f6f9fc 0%, #f1f4f9 100%);
+  border-left: 4px solid #007AFF;
+}
+
+.recording-item.deleting {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.recording-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.recording-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.recording-time {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.recording-date {
+  font-size: 15px;
+  color: #1c1c1e;
+  font-weight: 500;
+}
+
+.recording-duration {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #8e8e93;
+}
+
+.duration-icon {
+  font-size: 12px;
+}
+
+.recording-controls {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.play-button, .delete-button, .share-button {
+  border: none;
+  background: none;
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+}
+
+.play-button {
+  background: #007AFF;
+  color: white;
+}
+
+.play-button:hover {
+  background: #0066cc;
+  transform: scale(1.05);
+}
+
+.play-button.playing {
+  background: #FF9500;
+}
+
+.share-button {
+  color: #34C759;
+  opacity: 0.7;
+  background: rgba(52, 199, 89, 0.1);
+}
+
+.share-button:hover {
+  opacity: 1;
+  background: rgba(52, 199, 89, 0.2);
+}
+
+.delete-button {
+  color: #FF3B30;
+  opacity: 0.7;
+  background: rgba(255, 59, 48, 0.1);
+}
+
+.delete-button:hover {
+  opacity: 1;
+  background: rgba(255, 59, 48, 0.2);
+}
+
+.playback-progress {
+  position: relative;
+}
+
+.progress-bar {
+  height: 4px;
+  background: rgba(0, 122, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #007AFF;
+  transition: width 0.1s linear;
+}
+
+.wave-animation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 20px;
+  padding: 0 12px;
+}
+
+.wave-bar {
+  width: 2px;
+  background: #007AFF;
+  opacity: 0.3;
+  animation: wave 0.5s ease infinite alternate;
+}
+
+@keyframes wave {
+  0% {
+    height: 4px;
+  }
+  100% {
+    height: 16px;
+  }
+}
+
+/* 美化滚动条 */
+.modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 修改控制按钮样式 */
+.recording-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.recording-controls {
+  display: flex;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.control-button {
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.control-button svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2px;
+}
+
+.play-button {
+  background: #007AFF;
+  color: white;
+}
+
+.play-button:hover {
+  background: #0066cc;
+  transform: scale(1.05);
+}
+
+.play-button.playing {
+  background: #FF9500;
+}
+
+.share-button {
+  background: rgba(52, 199, 89, 0.1);
+  color: #34C759;
+}
+
+.share-button:hover {
+  background: rgba(52, 199, 89, 0.2);
+  transform: scale(1.05);
+}
+
+.delete-button {
+  background: rgba(255, 59, 48, 0.1);
+  color: #FF3B30;
+}
+
+.delete-button:hover {
+  background: rgba(255, 59, 48, 0.2);
+  transform: scale(1.05);
 }
