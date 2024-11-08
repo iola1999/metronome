@@ -34,7 +34,7 @@ export const RecordingList = ({
 
   const handleModalClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
-      onClose();
+      handleClose();
     }
   };
 
@@ -43,7 +43,7 @@ export const RecordingList = ({
       <div className="modal-content">
         <div className="modal-header">
           <h2>录音历史</h2>
-          <button className="modal-close-btn" onClick={onClose}>×</button>
+          <button className="modal-close-btn" onClick={handleClose}>×</button>
         </div>
         <div className="recordings-list">
           {recordings.length === 0 ? (

@@ -16,14 +16,16 @@ export const RecordingManager = () => {
   const startTimeRef = useRef<number | null>(null);
   const timerRef = useRef<number | null>(null);
   const dbRef = useRef<RecordingsDB>(new RecordingsDB());
-  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(
+    null
+  );
 
   // 添加一个 Map 来存储每个录音的 Audio 实例
   const audioInstancesRef = useRef<Map<number, HTMLAudioElement>>(new Map());
 
   const playRecording = (recording: Recording) => {
     if (!recording.id) return;
-    
+
     // 如果是同一个录音
     if (playingId === recording.id && currentAudio) {
       if (currentAudio.paused) {
@@ -54,11 +56,11 @@ export const RecordingManager = () => {
     audio.src = audioUrl;
 
     // 设置事件监听
-    audio.addEventListener('timeupdate', () => {
+    audio.addEventListener("timeupdate", () => {
       setPlayProgress((audio.currentTime / audio.duration) * 100);
     });
 
-    audio.addEventListener('ended', () => {
+    audio.addEventListener("ended", () => {
       setIsPlaying(false);
       setPlayingId(null);
       setPlayProgress(0);
@@ -66,9 +68,9 @@ export const RecordingManager = () => {
       setCurrentAudio(null);
     });
 
-    audio.addEventListener('error', (e) => {
-      console.error('音频播放失败:', e);
-      alert('音频播放失败，可能是格式不支持');
+    audio.addEventListener("error", (e) => {
+      console.error("音频播放失败:", e);
+      alert("音频播放失败，可能是格式不支持");
       setIsPlaying(false);
       setPlayingId(null);
       setPlayProgress(0);
@@ -80,10 +82,10 @@ export const RecordingManager = () => {
     setCurrentAudio(audio);
     setPlayingId(recording.id);
     setIsPlaying(true);
-    
-    audio.play().catch(error => {
-      console.error('播放失败:', error);
-      alert('播放失败，请检查音频格式是否支持');
+
+    audio.play().catch((error) => {
+      console.error("播放失败:", error);
+      alert("播放失败，请检查音频格式是否支持");
       setIsPlaying(false);
       setPlayingId(null);
       setPlayProgress(0);
@@ -116,27 +118,27 @@ export const RecordingManager = () => {
   // 获取支持的 MIME 类型
   const getSupportedMimeType = () => {
     const types = [
-      'audio/webm;codecs=opus',
-      'audio/webm',
-      'audio/ogg;codecs=opus',
-      'audio/mp4;codecs=aac',
-      'audio/mpeg',
+      "audio/webm;codecs=opus",
+      "audio/webm",
+      "audio/ogg;codecs=opus",
+      "audio/mp4;codecs=aac",
+      "audio/mpeg",
     ];
-    
+
     for (const type of types) {
       if (MediaRecorder.isTypeSupported(type)) {
-        console.log('使用录音格式:', type);
+        console.log("使用录音格式:", type);
         return type;
       }
     }
-    console.warn('没有找到支持的录音格式，使用默认格式');
-    return '';
+    console.warn("没有找到支持的录音格式，使用默认格式");
+    return "";
   };
 
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      
+
       // 创建 MediaRecorder 时使用支持的 MIME 类型
       const options: MediaRecorderOptions = {};
       const mimeType = getSupportedMimeType();
@@ -159,9 +161,9 @@ export const RecordingManager = () => {
       startTimeRef.current = Date.now();
 
       // 停止所有之前的音轨
-      stream.getAudioTracks().forEach(track => {
+      stream.getAudioTracks().forEach((track) => {
         track.onended = () => {
-          console.log('音轨结束');
+          console.log("音轨结束");
           stopRecording();
         };
       });
@@ -174,14 +176,20 @@ export const RecordingManager = () => {
   };
 
   const stopRecording = async () => {
-    if (!mediaRecorderRef.current || mediaRecorderRef.current.state === 'inactive') return;
+    if (
+      !mediaRecorderRef.current ||
+      mediaRecorderRef.current.state === "inactive"
+    )
+      return;
 
     try {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
 
       // 停止所有音轨
-      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      mediaRecorderRef.current.stream
+        .getTracks()
+        .forEach((track) => track.stop());
 
       if (timerRef.current) {
         clearInterval(timerRef.current);
@@ -195,11 +203,11 @@ export const RecordingManager = () => {
 
       // 确保有录音数据
       if (recordedChunksRef.current.length === 0) {
-        throw new Error('没有录到音频数据');
+        throw new Error("没有录到音频数据");
       }
 
-      const blob = new Blob(recordedChunksRef.current, { 
-        type: mediaRecorderRef.current.mimeType || 'audio/webm'
+      const blob = new Blob(recordedChunksRef.current, {
+        type: mediaRecorderRef.current.mimeType || "audio/webm",
       });
 
       const recording = {
@@ -212,8 +220,8 @@ export const RecordingManager = () => {
       await loadRecordings();
       setRecordingTime("00:00");
     } catch (err) {
-      console.error('停止录音失败:', err);
-      alert('录音保存失败，请重试');
+      console.error("停止录音失败:", err);
+      alert("录音保存失败，请重试");
     }
   };
 
@@ -243,7 +251,7 @@ export const RecordingManager = () => {
         setPlayProgress(0);
       }
       // 清理所有 Audio 实例
-      audioInstancesRef.current.forEach((audio, id) => {
+      audioInstancesRef.current.forEach((audio) => {
         URL.revokeObjectURL(audio.src);
       });
       audioInstancesRef.current.clear();
