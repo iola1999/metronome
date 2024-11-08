@@ -29,6 +29,18 @@ export const RecordingMainControls = styled.div`
   margin: 0 auto;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  position: relative;
+`;
+
+export const RecordingLabel = styled.span`
+  position: absolute;
+  left: 24px;
+  top: -20px;
+  font-size: 0.85rem;
+  color: ${({ theme }) => theme.colors.primary}99;
+  background: ${({ theme }) => theme.colors.surface};
+  padding: 2px 8px;
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
 `;
 
 export const RecordButton = styled.button<{ recording: boolean }>`

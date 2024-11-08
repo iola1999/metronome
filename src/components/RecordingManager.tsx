@@ -9,6 +9,7 @@ import {
   RecordTime,
   ShowRecordingsButton,
   RecordingsCount,
+  RecordingLabel,
 } from "../styles/components/RecordingStyles";
 
 interface RecordingManagerProps {
@@ -300,12 +301,13 @@ export const RecordingManager = ({
   return (
     <RecordingControlsContainer>
       <RecordingMainControls>
+        <RecordingLabel>录音</RecordingLabel>
         <RecordButton
           recording={isRecording}
           onClick={isRecording ? stopRecording : startRecording}
         >
           <RecordIcon />
-          {isRecording ? "停止录音" : "录音"}
+          {isRecording ? "结束" : "开始"}
         </RecordButton>
 
         {(isRecording || recordingTime !== "00:00") && (
