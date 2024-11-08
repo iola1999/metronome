@@ -7,6 +7,7 @@ interface RecordingListProps {
   onClose: () => void;
   onDelete: (id: number) => Promise<void>;
   playingId: number | null;
+  isPlaying: boolean;
   onPlayToggle: (recording: Recording) => void;
   playProgress: number;
 }
@@ -17,19 +18,32 @@ export const RecordingList = ({
   onClose,
   onDelete,
   playingId,
+  isPlaying,
   onPlayToggle,
   playProgress,
 }: RecordingListProps) => {
-  if (!isOpen) return null;
+  const handleClose = () => {
+    if (playingId !== null) {
+      const playingRecording = recordings.find(r => r.id === playingId);
+      if (playingRecording) {
+        onPlayToggle(playingRecording);
+      }
+    }
+    onClose();
+  };
+
+  const handleModalClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
 
   return (
-    <div className="modal show" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <div className={`modal ${isOpen ? "show" : ""}`} onClick={handleModalClick}>
+      <div className="modal-content">
         <div className="modal-header">
-          <h2>录音列表</h2>
-          <button className="close-btn" onClick={onClose}>
-            &times;
-          </button>
+          <h2>录音历史</h2>
+          <button className="modal-close-btn" onClick={onClose}>×</button>
         </div>
         <div className="recordings-list">
           {recordings.length === 0 ? (
@@ -39,8 +53,9 @@ export const RecordingList = ({
               <RecordingItem
                 key={recording.id}
                 recording={recording}
-                isPlaying={playingId === recording.id}
+                isPlaying={playingId === recording.id && isPlaying}
                 playProgress={playingId === recording.id ? playProgress : 0}
+                playingId={playingId}
                 onPlayToggle={onPlayToggle}
                 onDelete={onDelete}
               />

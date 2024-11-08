@@ -5,6 +5,7 @@ interface RecordingItemProps {
   recording: Recording;
   isPlaying: boolean;
   playProgress: number;
+  playingId: number | null;
   onPlayToggle: (recording: Recording) => void;
   onDelete: (id: number) => Promise<void>;
 }
@@ -13,6 +14,7 @@ export const RecordingItem = ({
   recording,
   isPlaying,
   playProgress,
+  playingId,
   onPlayToggle,
   onDelete,
 }: RecordingItemProps) => {
@@ -75,46 +77,56 @@ export const RecordingItem = ({
 
   const handleShare = async () => {
     try {
-      const file = new File([recording.blob], `录音_${formatDate(new Date(recording.date))}.wav`, {
-        type: recording.blob.type
-      });
+      const file = new File(
+        [recording.blob],
+        `录音_${formatDate(new Date(recording.date))}.wav`,
+        {
+          type: recording.blob.type,
+        }
+      );
 
       if (navigator.share && navigator.canShare({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: '分享录音',
+          title: "分享录音",
           text: `录音于 ${formatDate(new Date(recording.date))}`,
         });
       } else {
         // 降级方案：创建下载链接
         const url = URL.createObjectURL(recording.blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
-        a.download = `录音_${formatDate(new Date(recording.date))}.${getFileExtension(recording.blob.type)}`;
+        a.download = `录音_${formatDate(
+          new Date(recording.date)
+        )}.${getFileExtension(recording.blob.type)}`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       }
     } catch (error) {
-      console.error('分享失败:', error);
+      console.error("分享失败:", error);
     }
   };
 
   // 根据 MIME 类型获取文件扩展名
   const getFileExtension = (mimeType: string): string => {
     const extensions: { [key: string]: string } = {
-      'audio/webm': 'webm',
-      'audio/ogg': 'ogg',
-      'audio/mp4': 'm4a',
-      'audio/mpeg': 'mp3',
-      'audio/wav': 'wav'
+      "audio/webm": "webm",
+      "audio/ogg": "ogg",
+      "audio/mp4": "m4a",
+      "audio/mpeg": "mp3",
+      "audio/wav": "wav",
     };
-    return extensions[mimeType] || 'webm';
+    return extensions[mimeType] || "webm";
   };
 
   return (
-    <div className={`recording-item ${isPlaying ? "playing" : ""} ${isDeleting ? "deleting" : ""}`}>
+    <div
+      className={`recording-item ${isPlaying ? "playing" : ""} ${
+        isDeleting ? "deleting" : ""
+      }`}
+    >
       <div className="recording-item-content">
         <div className="recording-info">
           <div className="recording-time">
@@ -129,38 +141,64 @@ export const RecordingItem = ({
 
           <div className="recording-controls">
             <button
-              className={`control-button play-button ${isPlaying ? "playing" : ""}`}
+              className={`control-button play-button ${
+                isPlaying && playingId === recording.id ? "playing" : ""
+              }`}
               onClick={() => onPlayToggle(recording)}
-              title="播放/暂停"
+              title={isPlaying && playingId === recording.id ? "暂停" : "播放"}
             >
-              {isPlaying ? (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              {isPlaying && playingId === recording.id ? (
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
                   <rect x="6" y="4" width="4" height="16" rx="1" />
                   <rect x="14" y="4" width="4" height="16" rx="1" />
                 </svg>
               ) : (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
                   <path d="M8 5v14l11-7z" fill="currentColor" />
                 </svg>
               )}
             </button>
-            <button 
-              className="control-button share-button" 
+            <button
+              className="control-button share-button"
               onClick={handleShare}
               title="分享"
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
                 <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
                 <polyline points="16 6 12 2 8 6" />
                 <line x1="12" y1="2" x2="12" y2="15" />
               </svg>
             </button>
-            <button 
-              className="control-button delete-button" 
+            <button
+              className="control-button delete-button"
               onClick={handleDelete}
               title="删除"
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
                 <path d="M3 6h18" />
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
                 <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
@@ -171,7 +209,7 @@ export const RecordingItem = ({
           </div>
         </div>
 
-        {isPlaying && (
+        {(playingId === recording.id || playProgress > 0) && (
           <div className="playback-progress">
             <div className="progress-bar">
               <div

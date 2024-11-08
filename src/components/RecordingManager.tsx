@@ -8,6 +8,7 @@ export const RecordingManager = () => {
   const [recordingTime, setRecordingTime] = useState("00:00");
   const [showModal, setShowModal] = useState(false);
   const [playingId, setPlayingId] = useState<number | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [playProgress, setPlayProgress] = useState(0);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -17,58 +18,89 @@ export const RecordingManager = () => {
   const dbRef = useRef<RecordingsDB>(new RecordingsDB());
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
 
-  const stopCurrentAudio = () => {
-    if (currentAudio) {
-      currentAudio.pause();
-      currentAudio.currentTime = 0;
-      setCurrentAudio(null);
-      setPlayingId(null);
-      setPlayProgress(0);
-    }
-  };
+  // 添加一个 Map 来存储每个录音的 Audio 实例
+  const audioInstancesRef = useRef<Map<number, HTMLAudioElement>>(new Map());
 
   const playRecording = (recording: Recording) => {
     if (!recording.id) return;
     
-    stopCurrentAudio();
-    
-    const audio = new Audio();
-    audio.src = URL.createObjectURL(recording.blob);
-    
-    audio.onerror = (e) => {
-      console.error('音频播放失败:', e);
-      alert('音频播放失败，可能是格式不支持');
-      setPlayingId(null);
-    };
+    // 如果是同一个录音
+    if (playingId === recording.id && currentAudio) {
+      if (currentAudio.paused) {
+        // 从暂停位置继续播放
+        currentAudio.play();
+        setIsPlaying(true);
+      } else {
+        // 暂停播放，但保持 playingId 以显示进度条
+        currentAudio.pause();
+        setIsPlaying(false);
+      }
+      return;
+    }
 
-    audio.onloadeddata = () => {
-      console.log('音频加载成功');
-    };
-
-    audio.onended = () => {
-      URL.revokeObjectURL(audio.src);
+    // 如果是新的录音，先停止当前播放的音频
+    if (currentAudio) {
+      currentAudio.pause();
+      URL.revokeObjectURL(currentAudio.src);
       setCurrentAudio(null);
       setPlayingId(null);
+      setIsPlaying(false);
       setPlayProgress(0);
-    };
+    }
 
-    // 更新播放进度
-    audio.ontimeupdate = () => {
+    // 创建新的 Audio 实例
+    const audio = new Audio();
+    const audioUrl = URL.createObjectURL(recording.blob);
+    audio.src = audioUrl;
+
+    // 设置事件监听
+    audio.addEventListener('timeupdate', () => {
       setPlayProgress((audio.currentTime / audio.duration) * 100);
-    };
+    });
 
+    audio.addEventListener('ended', () => {
+      setIsPlaying(false);
+      setPlayingId(null);
+      setPlayProgress(0);
+      URL.revokeObjectURL(audioUrl);
+      setCurrentAudio(null);
+    });
+
+    audio.addEventListener('error', (e) => {
+      console.error('音频播放失败:', e);
+      alert('音频播放失败，可能是格式不支持');
+      setIsPlaying(false);
+      setPlayingId(null);
+      setPlayProgress(0);
+      URL.revokeObjectURL(audioUrl);
+      setCurrentAudio(null);
+    });
+
+    // 设置状态并播放
     setCurrentAudio(audio);
     setPlayingId(recording.id);
+    setIsPlaying(true);
+    
     audio.play().catch(error => {
       console.error('播放失败:', error);
       alert('播放失败，请检查音频格式是否支持');
+      setIsPlaying(false);
       setPlayingId(null);
+      setPlayProgress(0);
+      URL.revokeObjectURL(audioUrl);
+      setCurrentAudio(null);
     });
   };
 
   useEffect(() => {
     return () => {
-      stopCurrentAudio();
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        setCurrentAudio(null);
+        setPlayingId(null);
+        setPlayProgress(0);
+      }
     };
   }, []);
 
@@ -203,19 +235,35 @@ export const RecordingManager = () => {
   // 组件卸载时清理资源
   useEffect(() => {
     return () => {
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-        mediaRecorderRef.current.stop();
-        mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        setCurrentAudio(null);
+        setPlayingId(null);
+        setPlayProgress(0);
       }
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
+      // 清理所有 Audio 实例
+      audioInstancesRef.current.forEach((audio, id) => {
+        URL.revokeObjectURL(audio.src);
+      });
+      audioInstancesRef.current.clear();
     };
   }, []);
 
   const handleDelete = async (id: number) => {
     if (playingId === id) {
-      stopCurrentAudio();
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        setCurrentAudio(null);
+        setPlayingId(null);
+        setPlayProgress(0);
+      }
+    }
+    const audio = audioInstancesRef.current.get(id);
+    if (audio) {
+      URL.revokeObjectURL(audio.src);
+      audioInstancesRef.current.delete(id);
     }
     await dbRef.current.deleteRecording(id);
     await loadRecordings();
@@ -223,12 +271,7 @@ export const RecordingManager = () => {
 
   const handlePlayToggle = (recording: Recording) => {
     if (!recording.id) return;
-    
-    if (playingId === recording.id) {
-      stopCurrentAudio();
-    } else {
-      playRecording(recording);
-    }
+    playRecording(recording);
   };
 
   return (
@@ -262,6 +305,7 @@ export const RecordingManager = () => {
         onClose={() => setShowModal(false)}
         onDelete={handleDelete}
         playingId={playingId}
+        isPlaying={isPlaying}
         onPlayToggle={handlePlayToggle}
         playProgress={playProgress}
       />
