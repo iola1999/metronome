@@ -1,10 +1,36 @@
-import { RecordingsDB } from "./db.js";
+import { RecordingsDB, Recording } from "./db";
+
+// 添加 webkitAudioContext 的类型声明
+declare global {
+  interface Window {
+    webkitAudioContext: typeof AudioContext;
+  }
+}
+
+interface RecordingItem {
+  id: number;
+  date: string;
+  duration: number;
+  blob: Blob;
+}
 
 class Metronome {
+  private audioContext: AudioContext | null;
+  private isPlaying: boolean;
+  private tempo: number;
+  private tempoUpdateTimeout: number | null;
+  private currentBeat: number;
+  private tickTimeout: number | null;
+  private tempoSlider!: HTMLInputElement;
+  private startStopButton!: HTMLButtonElement;
+  private presetButtons!: NodeListOf<HTMLButtonElement>;
+  private tempoDisplay!: HTMLElement;
+  private beats!: NodeListOf<Element>;
+
   constructor() {
     this.audioContext = null;
     this.isPlaying = false;
-    this.tempo = parseInt(localStorage.getItem("lastTempo")) || 120;
+    this.tempo = parseInt(localStorage.getItem("lastTempo") || "120");
     this.tempoUpdateTimeout = null;
     this.currentBeat = 0;
     this.tickTimeout = null;
@@ -13,29 +39,35 @@ class Metronome {
     this.setupEventListeners();
 
     // 初始化时设置保存的速度
-    this.tempoSlider.value = this.tempo;
-    this.tempoDisplay = document.getElementById("tempo-value");
-    this.tempoDisplay.textContent = this.tempo;
-    this.beats = document.querySelectorAll(".beat");
+    this.tempoSlider.value = this.tempo.toString();
+    this.tempoDisplay.textContent = this.tempo.toString();
 
     // 设置当前速度对应的预设按钮激活状态
     this.updatePresetButtonState();
   }
 
-  initializeElements() {
-    this.tempoSlider = document.getElementById("tempo-slider");
-    this.startStopButton = document.getElementById("start-stop");
+  private initializeElements(): void {
+    this.tempoSlider = document.getElementById(
+      "tempo-slider"
+    ) as HTMLInputElement;
+    this.startStopButton = document.getElementById(
+      "start-stop"
+    ) as HTMLButtonElement;
     this.presetButtons = document.querySelectorAll(".preset-btn");
+    this.tempoDisplay = document.getElementById("tempo-value")!;
+    this.beats = document.querySelectorAll(".beat");
   }
 
-  setupEventListeners() {
-    this.tempoSlider.addEventListener("input", (e) => {
-      const newTempo = e.target.value;
+  private setupEventListeners(): void {
+    this.tempoSlider.addEventListener("input", (e: Event) => {
+      const newTempo = (e.target as HTMLInputElement).value;
       this.tempoDisplay.textContent = newTempo;
 
-      clearTimeout(this.tempoUpdateTimeout);
-      this.tempoUpdateTimeout = setTimeout(() => {
-        this.updateTempo(newTempo);
+      if (this.tempoUpdateTimeout) {
+        clearTimeout(this.tempoUpdateTimeout);
+      }
+      this.tempoUpdateTimeout = window.setTimeout(() => {
+        this.updateTempo(parseInt(newTempo));
       }, 200);
     });
 
@@ -43,18 +75,17 @@ class Metronome {
       this.toggleMetronome()
     );
 
-    // 设置预设按钮事件
     this.presetButtons.forEach((btn) => {
       btn.addEventListener("click", () => {
-        const newTempo = parseInt(btn.dataset.tempo);
+        const newTempo = parseInt(btn.dataset.tempo || "120");
         this.updateTempo(newTempo);
       });
     });
   }
 
-  updatePresetButtonState() {
+  private updatePresetButtonState(): void {
     this.presetButtons.forEach((btn) => {
-      const btnTempo = parseInt(btn.dataset.tempo);
+      const btnTempo = parseInt(btn.dataset.tempo || "120");
       if (btnTempo === this.tempo) {
         btn.classList.add("active");
       } else {
@@ -63,25 +94,21 @@ class Metronome {
     });
   }
 
-  updateTempo(newTempo) {
+  private updateTempo(newTempo: number): void {
     this.tempo = Math.min(Math.max(newTempo, 30), 240);
-    this.tempoSlider.value = this.tempo;
-    this.tempoDisplay.textContent = this.tempo;
+    this.tempoSlider.value = this.tempo.toString();
+    this.tempoDisplay.textContent = this.tempo.toString();
 
-    localStorage.setItem("lastTempo", this.tempo);
+    localStorage.setItem("lastTempo", this.tempo.toString());
     this.updatePresetButtonState();
 
     if (this.isPlaying) {
-      if (this.tickTimeout) {
-        clearTimeout(this.tickTimeout);
-        this.tickTimeout = null;
-      }
       this.stop();
       this.start();
     }
   }
 
-  async start() {
+  private async start(): Promise<void> {
     if (!this.audioContext) {
       this.audioContext = new (window.AudioContext ||
         window.webkitAudioContext)();
@@ -91,11 +118,8 @@ class Metronome {
     this.startStopButton.textContent = "停止";
 
     const interval = (60 / this.tempo) * 1000;
-
-    // 立即播放第一个音
     await this.playClick();
 
-    // 设置定时器进行后续播放
     const tick = async () => {
       if (!this.isPlaying) return;
 
@@ -103,7 +127,7 @@ class Metronome {
         clearTimeout(this.tickTimeout);
       }
 
-      this.tickTimeout = setTimeout(async () => {
+      this.tickTimeout = window.setTimeout(async () => {
         if (this.isPlaying) {
           await this.playClick();
           tick();
@@ -114,7 +138,7 @@ class Metronome {
     tick();
   }
 
-  stop() {
+  private stop(): void {
     this.isPlaying = false;
     this.startStopButton.textContent = "开始";
 
@@ -127,7 +151,7 @@ class Metronome {
     this.beats.forEach((beat) => beat.classList.remove("active"));
   }
 
-  toggleMetronome() {
+  private toggleMetronome(): void {
     if (this.isPlaying) {
       this.stop();
     } else {
@@ -135,12 +159,11 @@ class Metronome {
     }
   }
 
-  async playClick() {
+  private async playClick(): Promise<void> {
     if (!this.audioContext) return;
 
     this.currentBeat = (this.currentBeat + 1) % 4;
 
-    // 更新视觉指示器
     this.beats.forEach((beat, index) => {
       beat.classList.remove("active");
       if (index === this.currentBeat) {
@@ -154,7 +177,6 @@ class Metronome {
     oscillator.connect(gainNode);
     gainNode.connect(this.audioContext.destination);
 
-    // 第一拍使用不同的频率和音量
     if (this.currentBeat === 0) {
       oscillator.frequency.value = 1500;
       gainNode.gain.value = 0.6;
@@ -164,7 +186,6 @@ class Metronome {
     }
 
     const now = this.audioContext.currentTime;
-
     oscillator.start(now);
     gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
     oscillator.stop(now + 0.1);
@@ -172,6 +193,19 @@ class Metronome {
 }
 
 class RecordingManager {
+  private mediaRecorder: MediaRecorder | null;
+  private recordedChunks: Blob[];
+  private isRecording: boolean;
+  private startTime: number | null;
+  private recordingTimer: number | null;
+  private db: RecordingsDB;
+  private recordBtn!: HTMLButtonElement;
+  private recordTime!: HTMLElement;
+  private showRecordingsBtn!: HTMLButtonElement;
+  private modal!: HTMLElement;
+  private closeModalBtn!: HTMLElement;
+  private recordingsList!: HTMLElement;
+
   constructor() {
     this.mediaRecorder = null;
     this.recordedChunks = [];
@@ -185,32 +219,33 @@ class RecordingManager {
     this.initDB();
   }
 
-  async initDB() {
+  private initElements(): void {
+    this.recordBtn = document.getElementById("record-btn") as HTMLButtonElement;
+    this.recordTime = document.getElementById("record-time")!;
+    this.showRecordingsBtn = document.getElementById(
+      "show-recordings"
+    ) as HTMLButtonElement;
+    this.modal = document.getElementById("recordings-modal")!;
+    this.closeModalBtn = document.querySelector(".close-btn")!;
+    this.recordingsList = document.querySelector(".recordings-list")!;
+  }
+
+  private async initDB(): Promise<void> {
     await this.db.init();
-    this.loadRecordings();
+    await this.loadRecordings();
   }
 
-  initElements() {
-    this.recordBtn = document.getElementById("record-btn");
-    this.recordTime = document.getElementById("record-time");
-    this.showRecordingsBtn = document.getElementById("show-recordings");
-    this.modal = document.getElementById("recordings-modal");
-    this.closeModalBtn = document.querySelector(".close-btn");
-    this.recordingsList = document.querySelector(".recordings-list");
-  }
-
-  setupEventListeners() {
+  private setupEventListeners(): void {
     this.recordBtn.addEventListener("click", () => this.toggleRecording());
     this.showRecordingsBtn.addEventListener("click", () => this.showModal());
     this.closeModalBtn.addEventListener("click", () => this.hideModal());
 
-    // 点击模态框外部关闭
     this.modal.addEventListener("click", (e) => {
       if (e.target === this.modal) this.hideModal();
     });
   }
 
-  async toggleRecording() {
+  private async toggleRecording(): Promise<void> {
     if (!this.isRecording) {
       await this.startRecording();
     } else {
@@ -218,7 +253,7 @@ class RecordingManager {
     }
   }
 
-  async startRecording() {
+  private async startRecording(): Promise<void> {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       this.mediaRecorder = new MediaRecorder(stream);
@@ -243,32 +278,40 @@ class RecordingManager {
     }
   }
 
-  async stopRecording() {
+  private async stopRecording(): Promise<void> {
+    if (!this.mediaRecorder) return;
+
     this.mediaRecorder.stop();
     this.isRecording = false;
     this.recordBtn.classList.remove("recording");
     this.recordBtn.textContent = "录音";
-    clearInterval(this.recordingTimer);
 
-    // 等待数据可用
-    await new Promise((resolve) => {
-      this.mediaRecorder.onstop = resolve;
+    if (this.recordingTimer) {
+      clearInterval(this.recordingTimer);
+    }
+
+    await new Promise<void>((resolve) => {
+      if (this.mediaRecorder) {
+        this.mediaRecorder.onstop = () => resolve();
+      }
     });
 
     const blob = new Blob(this.recordedChunks, { type: "audio/webm" });
     const recording = {
       date: new Date().toISOString(),
-      duration: Date.now() - this.startTime,
+      duration: this.startTime ? Date.now() - this.startTime : 0,
       blob: blob,
     };
 
     await this.db.saveRecording(recording);
-    this.loadRecordings();
+    await this.loadRecordings();
     this.recordTime.textContent = "00:00";
   }
 
-  updateRecordingTime() {
-    this.recordingTimer = setInterval(() => {
+  private updateRecordingTime(): void {
+    this.recordingTimer = window.setInterval(() => {
+      if (!this.startTime) return;
+
       const duration = Date.now() - this.startTime;
       const minutes = Math.floor(duration / 60000);
       const seconds = Math.floor((duration % 60000) / 1000);
@@ -278,7 +321,7 @@ class RecordingManager {
     }, 1000);
   }
 
-  async loadRecordings() {
+  private async loadRecordings(): Promise<void> {
     const recordings = await this.db.getAllRecordings();
     this.recordingsList.innerHTML = "";
 
@@ -288,7 +331,7 @@ class RecordingManager {
     });
   }
 
-  createRecordingItem(recording) {
+  private createRecordingItem(recording: Recording): HTMLDivElement {
     const item = document.createElement("div");
     item.className = "recording-item";
 
@@ -297,41 +340,45 @@ class RecordingManager {
     const seconds = duration % 60;
 
     item.innerHTML = `
-            <div class="recording-info">
-                <span class="recording-date">
-                    ${new Date(recording.date).toLocaleString()}
-                </span>
-                <span class="recording-duration">
-                    ${minutes}:${seconds.toString().padStart(2, "0")}
-                </span>
-            </div>
-            <div class="recording-actions">
-                <button class="play-btn">播放</button>
-                <button class="delete-btn">删除</button>
-            </div>
-        `;
+      <div class="recording-info">
+        <span class="recording-date">
+          ${new Date(recording.date).toLocaleString()}
+        </span>
+        <span class="recording-duration">
+          ${minutes}:${seconds.toString().padStart(2, "0")}
+        </span>
+      </div>
+      <div class="recording-actions">
+        <button class="play-btn">播放</button>
+        <button class="delete-btn">删除</button>
+      </div>
+    `;
 
     const playBtn = item.querySelector(".play-btn");
     const deleteBtn = item.querySelector(".delete-btn");
 
-    playBtn.addEventListener("click", () => {
-      const audio = new Audio(URL.createObjectURL(recording.blob));
-      audio.play();
-    });
+    if (playBtn) {
+      playBtn.addEventListener("click", () => {
+        const audio = new Audio(URL.createObjectURL(recording.blob));
+        audio.play();
+      });
+    }
 
-    deleteBtn.addEventListener("click", async () => {
-      await this.db.deleteRecording(recording.id);
-      this.loadRecordings();
-    });
+    if (deleteBtn && recording.id) {
+      deleteBtn.addEventListener("click", async () => {
+        await this.db.deleteRecording(recording.id!);
+        await this.loadRecordings();
+      });
+    }
 
     return item;
   }
 
-  showModal() {
+  private showModal(): void {
     this.modal.classList.add("show");
   }
 
-  hideModal() {
+  private hideModal(): void {
     this.modal.classList.remove("show");
   }
 }
