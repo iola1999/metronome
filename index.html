@@ -33,8 +33,35 @@
                 </div>
             </div>
             <button id="start-stop">开始</button>
+            <div class="record-controls">
+                <button id="record-btn" class="record-btn">
+                    <span class="record-icon"></span>
+                    录音
+                </button>
+                <div id="record-time" class="record-time">00:00</div>
+            </div>
         </div>
+        
+        <!-- 录音列表弹层 -->
+        <div id="recordings-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>录音列表</h2>
+                    <button class="close-btn">&times;</button>
+                </div>
+                <div class="recordings-list">
+                    <!-- 录音列表将通过 JavaScript 动态添加 -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- 添加录音列表按钮 -->
+        <button id="show-recordings" class="show-recordings-btn">
+            <span class="list-icon"></span>
+            录音列表
+        </button>
     </div>
+    <script src="db.js"></script>
     <script src="app.js"></script>
 </body>
 </html> 
