@@ -404,13 +404,14 @@ button:hover {
 /* 录音控制区域 */
 .recording-controls-container {
   position: fixed;
-  bottom: 20px;
+  bottom: env(safe-area-inset-bottom, 20px);
   left: 0;
   right: 0;
   display: flex;
   justify-content: center;
   z-index: 100;
   padding: 0 16px;
+  padding-bottom: max(env(safe-area-inset-bottom), 20px);
   box-sizing: border-box;
   width: 100%;
 }
@@ -428,6 +429,8 @@ button:hover {
   width: 100%;
   max-width: 500px;
   margin: 0 auto;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .record-btn, .show-recordings-btn {
@@ -607,7 +610,7 @@ button:hover {
 
 .recording-controls {
   display: flex;
-  gap: 8px;
+  gap: 16px;
   margin-left: auto;
   flex-shrink: 0;
 }
@@ -833,6 +836,8 @@ button:hover {
   position: absolute;
   right: -8px;
   top: -8px;
+  line-height: 1;
+  padding: 0;
 }
 
 .modal-close-btn:hover {

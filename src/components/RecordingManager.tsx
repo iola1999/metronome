@@ -2,7 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { RecordingsDB, Recording } from "../util/db";
 import { RecordingList } from "./RecordingList";
 
-export const RecordingManager = () => {
+interface RecordingManagerProps {
+  onPlaybackStart: () => void;
+}
+
+export const RecordingManager = ({ onPlaybackStart }: RecordingManagerProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [recordingTime, setRecordingTime] = useState("00:00");
@@ -32,6 +36,7 @@ export const RecordingManager = () => {
         // 从暂停位置继续播放
         currentAudio.play();
         setIsPlaying(true);
+        onPlaybackStart();
       } else {
         // 暂停播放，但保持 playingId 以显示进度条
         currentAudio.pause();
@@ -82,6 +87,7 @@ export const RecordingManager = () => {
     setCurrentAudio(audio);
     setPlayingId(recording.id);
     setIsPlaying(true);
+    onPlaybackStart();
 
     audio.play().catch((error) => {
       console.error("播放失败:", error);

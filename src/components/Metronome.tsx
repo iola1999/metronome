@@ -6,11 +6,15 @@ declare global {
   }
 }
 
-export const Metronome = () => {
+interface MetronomeProps {
+  isPlaying: boolean;
+  onPlayingChange: (isPlaying: boolean) => void;
+}
+
+export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
   const [tempo, setTempo] = useState(() => 
     parseInt(localStorage.getItem("lastTempo") || "120")
   );
-  const [isPlaying, setIsPlaying] = useState(false);
   const [currentBeat, setCurrentBeat] = useState(-1);
   const audioContextRef = useRef<AudioContext | null>(null);
   const tickTimeoutRef = useRef<number | null>(null);
@@ -178,7 +182,7 @@ export const Metronome = () => {
         </div>
       </div>
 
-      <button onClick={() => setIsPlaying(!isPlaying)}>
+      <button onClick={() => onPlayingChange(!isPlaying)}>
         {isPlaying ? '停止' : '开始'}
       </button>
     </div>
