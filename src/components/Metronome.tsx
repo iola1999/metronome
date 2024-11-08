@@ -16,6 +16,7 @@ import {
   TempoNumber,
 } from "../styles/components/MetronomeStyles";
 import { Button } from "../styles/components";
+import { useSettingsStore } from "../store/settings";
 
 declare global {
   interface Window {
@@ -44,6 +45,8 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
   }, [tempo]);
 
   const playClick = useCallback(async (beatNumber: number) => {
+    const { volume, accentVolume, soundType } = useSettingsStore.getState().metronome;
+    
     if (!audioContextRef.current) {
       audioContextRef.current = new (window.AudioContext ||
         window.webkitAudioContext)();
@@ -59,18 +62,53 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
     oscillator.connect(gainNode);
     gainNode.connect(audioContextRef.current.destination);
 
-    if (beatNumber === 0) {
-      oscillator.frequency.value = 1500;
-      gainNode.gain.value = 0.6;
-    } else {
-      oscillator.frequency.value = 1000;
-      gainNode.gain.value = 0.4;
-    }
+    const getSoundFrequency = (isAccent: boolean) => {
+      switch (soundType) {
+        case 'beep':
+          return isAccent ? 1800 : 1200; // 电子音 - 高频
+        case 'wood':
+          return isAccent ? 180 : 120;   // 木鱼音 - 低频
+        case 'click':
+        default:
+          return isAccent ? 1500 : 1000; // 点击音 - 中频
+      }
+    };
 
     const now = audioContextRef.current.currentTime;
-    oscillator.start(now);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-    oscillator.stop(now + 0.1);
+    const isAccent = beatNumber === 0;
+    
+    oscillator.frequency.value = getSoundFrequency(isAccent);
+    gainNode.gain.value = isAccent ? accentVolume : volume;
+
+    switch (soundType) {
+      case 'beep':
+        oscillator.start(now);
+        gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+        oscillator.stop(now + 0.15);
+        break;
+        
+      case 'wood':
+        const lowOscillator = audioContextRef.current.createOscillator();
+        lowOscillator.connect(gainNode);
+        lowOscillator.frequency.value = getSoundFrequency(isAccent) * 0.5;
+        
+        oscillator.start(now);
+        lowOscillator.start(now);
+        gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+        oscillator.stop(now + 0.08);
+        lowOscillator.stop(now + 0.08);
+        break;
+        
+      case 'click':
+      default:
+        oscillator.start(now);
+        gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        oscillator.stop(now + 0.05);
+        break;
+    }
 
     setCurrentBeat(beatNumber);
   }, []);

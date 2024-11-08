@@ -1,10 +1,7 @@
 import { Recording } from "../util/db";
 import { RecordingItem } from "./RecordingItem";
-import { Modal, ModalContent, ModalHeader, ModalCloseButton } from "../styles/components";
-import {
-  RecordingsList,
-  NoRecordings,
-} from "../styles/components/RecordingStyles";
+import { Modal } from "./Modal";
+import { RecordingsList, NoRecordings } from "../styles/components/RecordingStyles";
 
 interface RecordingListProps {
   recordings: Recording[];
@@ -37,37 +34,25 @@ export const RecordingList = ({
     onClose();
   };
 
-  const handleModalClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      handleClose();
-    }
-  };
-
   return (
-    <Modal isOpen={isOpen} onClick={handleModalClick}>
-      <ModalContent>
-        <ModalHeader>
-          <h2>录音历史</h2>
-          <ModalCloseButton onClick={handleClose}>×</ModalCloseButton>
-        </ModalHeader>
-        <RecordingsList>
-          {recordings.length === 0 ? (
-            <NoRecordings>暂无录音</NoRecordings>
-          ) : (
-            recordings.map((recording) => (
-              <RecordingItem
-                key={recording.id}
-                recording={recording}
-                isPlaying={playingId === recording.id && isPlaying}
-                playProgress={playingId === recording.id ? playProgress : 0}
-                playingId={playingId}
-                onPlayToggle={onPlayToggle}
-                onDelete={onDelete}
-              />
-            ))
-          )}
-        </RecordingsList>
-      </ModalContent>
+    <Modal isOpen={isOpen} onClose={handleClose} title="录音历史">
+      <RecordingsList>
+        {recordings.length === 0 ? (
+          <NoRecordings>暂无录音</NoRecordings>
+        ) : (
+          recordings.map((recording) => (
+            <RecordingItem
+              key={recording.id}
+              recording={recording}
+              isPlaying={playingId === recording.id && isPlaying}
+              playProgress={playingId === recording.id ? playProgress : 0}
+              playingId={playingId}
+              onPlayToggle={onPlayToggle}
+              onDelete={onDelete}
+            />
+          ))
+        )}
+      </RecordingsList>
     </Modal>
   );
 };
