@@ -1,11 +1,10 @@
-import { useState } from "react";
-import { Modal } from "./Modal";
-import { useSettingsStore } from "../store/settings";
 import styled from "@emotion/styled";
+import { useSettingsStore } from "../store/settings";
+import { Modal } from "./Modal";
 
 const SettingSection = styled.div`
   padding: ${({ theme }) => theme.spacing.md};
-  
+
   h3 {
     margin-bottom: ${({ theme }) => theme.spacing.sm};
     color: ${({ theme }) => theme.colors.primary};
@@ -17,7 +16,7 @@ const SettingRow = styled.div`
   align-items: center;
   gap: ${({ theme }) => theme.spacing.md};
   margin-bottom: ${({ theme }) => theme.spacing.sm};
-  
+
   label {
     flex: 1;
     color: ${({ theme }) => theme.colors.primary};
@@ -55,7 +54,9 @@ export const Settings = ({ isOpen, onClose }: SettingsProps) => {
           <label>音效</label>
           <Select
             value={metronome.soundType}
-            onChange={(e) => setMetronomeSettings({ soundType: e.target.value as any })}
+            onChange={(e) =>
+              setMetronomeSettings({ soundType: e.target.value as any })
+            }
           >
             <option value="beep">电子音</option>
             <option value="click">点击音</option>
@@ -70,7 +71,9 @@ export const Settings = ({ isOpen, onClose }: SettingsProps) => {
             max="1"
             step="0.1"
             value={metronome.volume}
-            onChange={(e) => setMetronomeSettings({ volume: Number(e.target.value) })}
+            onChange={(e) =>
+              setMetronomeSettings({ volume: Number(e.target.value) })
+            }
           />
         </SettingRow>
         <SettingRow>
@@ -81,10 +84,12 @@ export const Settings = ({ isOpen, onClose }: SettingsProps) => {
             max="1"
             step="0.1"
             value={metronome.accentVolume}
-            onChange={(e) => setMetronomeSettings({ accentVolume: Number(e.target.value) })}
+            onChange={(e) =>
+              setMetronomeSettings({ accentVolume: Number(e.target.value) })
+            }
           />
         </SettingRow>
       </SettingSection>
     </Modal>
   );
-}; 
+};

@@ -1,9 +1,9 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 interface MetronomeSettings {
   volume: number;
-  soundType: 'beep' | 'click' | 'wood';
+  soundType: "beep" | "click" | "wood";
   accentVolume: number;
 }
 
@@ -17,7 +17,7 @@ export const useSettingsStore = create<SettingsState>()(
     (set) => ({
       metronome: {
         volume: 0.5,
-        soundType: 'click',
+        soundType: "click",
         accentVolume: 0.6,
       },
       setMetronomeSettings: (settings) =>
@@ -29,7 +29,7 @@ export const useSettingsStore = create<SettingsState>()(
         })),
     }),
     {
-      name: 'app-settings',
+      name: "app-settings",
     }
   )
-); 
+);
