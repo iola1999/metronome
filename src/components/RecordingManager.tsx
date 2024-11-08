@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { RecordingsDB, Recording } from '../js/db';
+import { useEffect, useRef, useState } from "react";
+import { RecordingsDB, Recording } from "../util/db";
 
 export const RecordingManager = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -92,21 +92,24 @@ export const RecordingManager = () => {
     <div>
       <div className="record-controls">
         <button
-          className={`record-btn ${isRecording ? 'recording' : ''}`}
+          className={`record-btn ${isRecording ? "recording" : ""}`}
           onClick={isRecording ? stopRecording : startRecording}
         >
-          {isRecording ? '停止录音' : '录音'}
+          {isRecording ? "停止录音" : "录音"}
         </button>
         <div className="record-time">{recordingTime}</div>
       </div>
 
-      <button className="show-recordings-btn" onClick={() => setShowModal(true)}>
+      <button
+        className="show-recordings-btn"
+        onClick={() => setShowModal(true)}
+      >
         录音列表
       </button>
 
       {showModal && (
         <div className="modal show" onClick={() => setShowModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>录音列表</h2>
               <button className="close-btn" onClick={() => setShowModal(false)}>
@@ -131,7 +134,9 @@ export const RecordingManager = () => {
                     <button
                       className="play-btn"
                       onClick={() => {
-                        const audio = new Audio(URL.createObjectURL(recording.blob));
+                        const audio = new Audio(
+                          URL.createObjectURL(recording.blob)
+                        );
                         audio.play();
                       }}
                     >
@@ -157,4 +162,4 @@ export const RecordingManager = () => {
       )}
     </div>
   );
-}; 
+};
