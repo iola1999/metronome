@@ -1,5 +1,4 @@
 import styled from "@emotion/styled";
-import { Theme } from "../theme";
 
 export const Controls = styled.div`
   display: flex;
