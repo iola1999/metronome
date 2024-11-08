@@ -26,10 +26,16 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,wav}']
+      },
+      strategies: 'injectManifest',
+      injectManifest: {
+        swSrc: 'sw.js',
+        swDest: 'dist/sw.js',
+        globDirectory: 'dist',
       }
     })
   ],
   server: {
-    https: true
+    https: false
   }
 }); 

@@ -1,4 +1,4 @@
-class RecordingsDB {
+export class RecordingsDB {
   constructor() {
     this.dbName = "MetronomeRecordings";
     this.dbVersion = 1;
