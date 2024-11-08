@@ -1,7 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { App } from "./App";
-import "./styles/styles.css";
 
 // 注册 Service Worker
 if ("serviceWorker" in navigator) {

@@ -1,7 +1,7 @@
 import { ThemeProvider } from '@emotion/react';
 import { theme } from './styles/theme';
 import { GlobalStyles } from './styles/GlobalStyles';
-import { Container } from './styles/components';
+import { StyledContainer } from './styles/components';
 import { Metronome } from './components/Metronome';
 import { RecordingManager } from './components/RecordingManager';
 import { useState } from 'react';
@@ -12,7 +12,7 @@ export const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyles theme={theme} />
-      <Container>
+      <StyledContainer theme={theme}>
         <Metronome 
           isPlaying={metronomeIsPlaying} 
           onPlayingChange={setMetronomeIsPlaying} 
@@ -20,7 +20,7 @@ export const App = () => {
         <RecordingManager 
           onPlaybackStart={() => setMetronomeIsPlaying(false)} 
         />
-      </Container>
+      </StyledContainer>
     </ThemeProvider>
   );
 };

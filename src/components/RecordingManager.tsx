@@ -1,12 +1,23 @@
 import { useEffect, useRef, useState } from "react";
 import { RecordingsDB, Recording } from "../util/db";
 import { RecordingList } from "./RecordingList";
+import {
+  RecordingControlsContainer,
+  RecordingMainControls,
+  RecordButton,
+  RecordIcon,
+  RecordTime,
+  ShowRecordingsButton,
+  RecordingsCount,
+} from "../styles/components/RecordingStyles";
 
 interface RecordingManagerProps {
   onPlaybackStart: () => void;
 }
 
-export const RecordingManager = ({ onPlaybackStart }: RecordingManagerProps) => {
+export const RecordingManager = ({
+  onPlaybackStart,
+}: RecordingManagerProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [recordingTime, setRecordingTime] = useState("00:00");
@@ -23,8 +34,6 @@ export const RecordingManager = ({ onPlaybackStart }: RecordingManagerProps) => 
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(
     null
   );
-
-  // 添加一个 Map 来存储每个录音的 Audio 实例
   const audioInstancesRef = useRef<Map<number, HTMLAudioElement>>(new Map());
 
   const playRecording = (recording: Recording) => {
@@ -121,7 +130,7 @@ export const RecordingManager = ({ onPlaybackStart }: RecordingManagerProps) => 
     setRecordings(records.reverse());
   };
 
-  // 获取支持的 MIME 类型
+  // 获取支���的 MIME 类型
   const getSupportedMimeType = () => {
     const types = [
       "audio/webm;codecs=opus",
@@ -289,29 +298,27 @@ export const RecordingManager = ({ onPlaybackStart }: RecordingManagerProps) => 
   };
 
   return (
-    <div className="recording-controls-container">
-      <div className="recording-main-controls">
-        <button
-          className={`record-btn ${isRecording ? "recording" : ""}`}
+    <RecordingControlsContainer>
+      <RecordingMainControls>
+        <RecordButton
+          recording={isRecording}
           onClick={isRecording ? stopRecording : startRecording}
         >
-          <span className="record-icon"></span>
+          <RecordIcon />
           {isRecording ? "停止录音" : "录音"}
-        </button>
+        </RecordButton>
+
         {(isRecording || recordingTime !== "00:00") && (
-          <div className="record-time">{recordingTime}</div>
+          <RecordTime>{recordingTime}</RecordTime>
         )}
-        <button
-          className="show-recordings-btn"
-          onClick={() => setShowModal(true)}
-        >
-          <span className="list-icon"></span>
+
+        <ShowRecordingsButton onClick={() => setShowModal(true)}>
           历史
           {recordings.length > 0 && (
-            <span className="recordings-count">{recordings.length}</span>
+            <RecordingsCount>{recordings.length}</RecordingsCount>
           )}
-        </button>
-      </div>
+        </ShowRecordingsButton>
+      </RecordingMainControls>
 
       <RecordingList
         recordings={recordings}
@@ -323,6 +330,6 @@ export const RecordingManager = ({ onPlaybackStart }: RecordingManagerProps) => 
         onPlayToggle={handlePlayToggle}
         playProgress={playProgress}
       />
-    </div>
+    </RecordingControlsContainer>
   );
 };

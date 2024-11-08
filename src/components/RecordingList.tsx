@@ -1,5 +1,10 @@
 import { Recording } from "../util/db";
 import { RecordingItem } from "./RecordingItem";
+import { Modal, ModalContent, ModalHeader, ModalCloseButton } from "../styles/components";
+import {
+  RecordingsList,
+  NoRecordings,
+} from "../styles/components/RecordingStyles";
 
 interface RecordingListProps {
   recordings: Recording[];
@@ -24,7 +29,7 @@ export const RecordingList = ({
 }: RecordingListProps) => {
   const handleClose = () => {
     if (playingId !== null) {
-      const playingRecording = recordings.find(r => r.id === playingId);
+      const playingRecording = recordings.find((r) => r.id === playingId);
       if (playingRecording) {
         onPlayToggle(playingRecording);
       }
@@ -39,15 +44,15 @@ export const RecordingList = ({
   };
 
   return (
-    <div className={`modal ${isOpen ? "show" : ""}`} onClick={handleModalClick}>
-      <div className="modal-content">
-        <div className="modal-header">
+    <Modal isOpen={isOpen} onClick={handleModalClick}>
+      <ModalContent>
+        <ModalHeader>
           <h2>录音历史</h2>
-          <button className="modal-close-btn" onClick={handleClose}>×</button>
-        </div>
-        <div className="recordings-list">
+          <ModalCloseButton onClick={handleClose}>×</ModalCloseButton>
+        </ModalHeader>
+        <RecordingsList>
           {recordings.length === 0 ? (
-            <div className="no-recordings">暂无录音</div>
+            <NoRecordings>暂无录音</NoRecordings>
           ) : (
             recordings.map((recording) => (
               <RecordingItem
@@ -61,8 +66,8 @@ export const RecordingList = ({
               />
             ))
           )}
-        </div>
-      </div>
-    </div>
+        </RecordingsList>
+      </ModalContent>
+    </Modal>
   );
-}; 
+};

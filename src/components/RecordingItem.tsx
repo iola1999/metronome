@@ -1,5 +1,18 @@
 import { useState, useEffect } from "react";
 import { Recording } from "../util/db";
+import {
+  RecordingItemContainer,
+  RecordingItemContent,
+  RecordingInfo,
+  RecordingTime,
+  RecordingDate,
+  RecordingDuration,
+  RecordingControls,
+  PlaybackProgress,
+  ProgressBar,
+  ProgressFill,
+} from "../styles/components/RecordingStyles";
+import { IconButton } from "../styles/components";
 
 interface RecordingItemProps {
   recording: Recording;
@@ -21,7 +34,6 @@ export const RecordingItem = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // 当显示删除确认时，5秒后自动重置
   useEffect(() => {
     let timer: number;
     if (showDeleteConfirm) {
@@ -36,7 +48,7 @@ export const RecordingItem = ({
 
   const handleDeleteClick = async () => {
     if (!recording.id) return;
-    
+
     if (!showDeleteConfirm) {
       setShowDeleteConfirm(true);
       return;
@@ -113,7 +125,6 @@ export const RecordingItem = ({
           text: `录音于 ${formatDate(new Date(recording.date))}`,
         });
       } else {
-        // 降级方案：创建下载链接
         const url = URL.createObjectURL(recording.blob);
         const a = document.createElement("a");
         a.href = url;
@@ -130,7 +141,6 @@ export const RecordingItem = ({
     }
   };
 
-  // 根据 MIME 类型获取文件扩展名
   const getFileExtension = (mimeType: string): string => {
     const extensions: { [key: string]: string } = {
       "audio/webm": "webm",
@@ -143,32 +153,27 @@ export const RecordingItem = ({
   };
 
   return (
-    <div
-      className={`recording-item ${isPlaying ? "playing" : ""} ${
-        isDeleting ? "deleting" : ""
-      }`}
-    >
-      <div className="recording-item-content">
-        <div className="recording-info">
-          <div className="recording-time">
-            <div className="recording-date">
+    <RecordingItemContainer playing={isPlaying} deleting={isDeleting}>
+      <RecordingItemContent>
+        <RecordingInfo>
+          <RecordingTime>
+            <RecordingDate>
               {formatDate(new Date(recording.date))}
-            </div>
-            <div className="recording-duration">
-              <span className="duration-icon">⏱</span>
+            </RecordingDate>
+            <RecordingDuration>
+              <span>⏱</span>
               {formatDuration(recording.duration)}
-            </div>
-          </div>
+            </RecordingDuration>
+          </RecordingTime>
 
-          <div className="recording-controls">
-            <button
-              className={`control-button play-button ${
-                isPlaying && playingId === recording.id ? "playing" : ""
-              }`}
+          <RecordingControls>
+            <IconButton
+              variant="primary"
+              className={isPlaying ? "playing" : ""}
               onClick={() => onPlayToggle(recording)}
-              title={isPlaying && playingId === recording.id ? "暂停" : "播放"}
+              title={isPlaying ? "暂停" : "播放"}
             >
-              {isPlaying && playingId === recording.id ? (
+              {isPlaying ? (
                 <svg
                   width="24"
                   height="24"
@@ -190,9 +195,9 @@ export const RecordingItem = ({
                   <path d="M8 5v14l11-7z" fill="currentColor" />
                 </svg>
               )}
-            </button>
-            <button
-              className="control-button share-button"
+            </IconButton>
+            <IconButton
+              variant="success"
               onClick={handleShare}
               title="分享"
             >
@@ -207,9 +212,10 @@ export const RecordingItem = ({
                 <polyline points="16 6 12 2 8 6" />
                 <line x1="12" y1="2" x2="12" y2="15" />
               </svg>
-            </button>
-            <button
-              className={`control-button delete-button ${showDeleteConfirm ? "confirming" : ""}`}
+            </IconButton>
+            <IconButton
+              variant="error"
+              className={showDeleteConfirm ? "confirming" : ""}
               onClick={handleDeleteClick}
               title={showDeleteConfirm ? "再次点击确认删除" : "删除"}
             >
@@ -238,21 +244,18 @@ export const RecordingItem = ({
                   <line x1="14" y1="11" x2="14" y2="17" />
                 </svg>
               )}
-            </button>
-          </div>
-        </div>
+            </IconButton>
+          </RecordingControls>
+        </RecordingInfo>
 
         {(playingId === recording.id || playProgress > 0) && (
-          <div className="playback-progress">
-            <div className="progress-bar">
-              <div
-                className="progress-fill"
-                style={{ width: `${playProgress}%` }}
-              />
-            </div>
-          </div>
+          <PlaybackProgress>
+            <ProgressBar>
+              <ProgressFill progress={playProgress} />
+            </ProgressBar>
+          </PlaybackProgress>
         )}
-      </div>
-    </div>
+      </RecordingItemContent>
+    </RecordingItemContainer>
   );
 };

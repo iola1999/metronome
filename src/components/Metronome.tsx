@@ -1,4 +1,20 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from "react";
+import {
+  Controls,
+  PendulumContainer,
+  Pendulum,
+  PendulumArm,
+  PendulumBob,
+  TempoDisplay,
+  BpmText,
+  BeatIndicator,
+  Beat,
+  TempoControl,
+  TempoSlider,
+  TempoPresets,
+  PresetButton,
+} from "../styles/components/MetronomeStyles";
+import { Button } from "../styles/components";
 
 declare global {
   interface Window {
@@ -12,7 +28,7 @@ interface MetronomeProps {
 }
 
 export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
-  const [tempo, setTempo] = useState(() => 
+  const [tempo, setTempo] = useState(() =>
     parseInt(localStorage.getItem("lastTempo") || "120")
   );
   const [currentBeat, setCurrentBeat] = useState(-1);
@@ -27,10 +43,11 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
 
   const playClick = useCallback(async (beatNumber: number) => {
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      audioContextRef.current = new (window.AudioContext ||
+        window.webkitAudioContext)();
     }
 
-    if (audioContextRef.current.state === 'suspended') {
+    if (audioContextRef.current.state === "suspended") {
       await audioContextRef.current.resume();
     }
 
@@ -58,14 +75,14 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
 
   const startTicking = useCallback(() => {
     const interval = (60 / tempo) * 1000;
-    
+
     const tick = async () => {
       if (!isPlaying) return;
-      
+
       beatCountRef.current = (beatCountRef.current + 1) % 4;
-      
+
       await playClick(beatCountRef.current);
-      
+
       tickTimeoutRef.current = window.setTimeout(tick, interval);
     };
 
@@ -99,92 +116,73 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
     setTempo(clampedTempo);
   };
 
-  useEffect(() => {
-    const pendulum = document.querySelector('.pendulum') as HTMLElement;
-    if (pendulum) {
-      pendulum.style.setProperty('--tempo', tempo.toString());
-      if (isPlaying) {
-        pendulum.classList.add('active');
-      } else {
-        pendulum.classList.remove('active');
-      }
-    }
-  }, [isPlaying, tempo]);
-
   return (
-    <div className="controls">
-      <div className="pendulum-container">
-        <div className="pendulum">
-          <div className="pendulum-arm" />
-          <div className="pendulum-bob" />
-        </div>
-      </div>
+    <Controls>
+      <PendulumContainer>
+        <Pendulum 
+          className={isPlaying ? "active" : ""} 
+          style={{ "--tempo": tempo } as React.CSSProperties}
+        >
+          <PendulumArm />
+          <PendulumBob />
+        </Pendulum>
+      </PendulumContainer>
 
-      <div className="tempo-display">
+      <TempoDisplay>
         <span>{tempo}</span>
-        <span className="bpm-text">BPM</span>
-      </div>
-      
-      <div className="beat-indicator">
+        <BpmText>BPM</BpmText>
+      </TempoDisplay>
+
+      <BeatIndicator>
         {[0, 1, 2, 3].map((beat) => (
-          <div
+          <Beat
             key={beat}
-            className={`beat ${currentBeat === beat ? 'active' : ''} ${beat === 0 ? 'first-beat' : ''}`}
+            active={currentBeat === beat}
+            firstBeat={beat === 0}
           />
         ))}
-      </div>
+      </BeatIndicator>
 
-      <div className="tempo-control">
-        <input
+      <TempoControl>
+        <TempoSlider
           type="range"
           min="30"
           max="240"
           value={tempo}
           onMouseDown={() => {
             setIsDragging(true);
-            if (isPlaying) {
-              if (tickTimeoutRef.current) {
-                clearTimeout(tickTimeoutRef.current);
-                tickTimeoutRef.current = null;
-              }
+            if (isPlaying && tickTimeoutRef.current) {
+              clearTimeout(tickTimeoutRef.current);
+              tickTimeoutRef.current = null;
             }
           }}
-          onMouseUp={() => {
-            setIsDragging(false);
-          }}
+          onMouseUp={() => setIsDragging(false)}
           onTouchStart={() => {
             setIsDragging(true);
-            if (isPlaying) {
-              if (tickTimeoutRef.current) {
-                clearTimeout(tickTimeoutRef.current);
-                tickTimeoutRef.current = null;
-              }
+            if (isPlaying && tickTimeoutRef.current) {
+              clearTimeout(tickTimeoutRef.current);
+              tickTimeoutRef.current = null;
             }
           }}
-          onTouchEnd={() => {
-            setIsDragging(false);
-          }}
-          onChange={(e) => {
-            const newTempo = parseInt(e.target.value);
-            handleTempoChange(newTempo);
-          }}
+          onTouchEnd={() => setIsDragging(false)}
+          onChange={(e) => handleTempoChange(parseInt(e.target.value))}
         />
-        <div className="tempo-presets">
+        <TempoPresets>
           {[60, 90, 120, 160].map((presetTempo) => (
-            <button
+            <PresetButton
               key={presetTempo}
-              className={`preset-btn ${tempo === presetTempo ? 'active' : ''}`}
+              active={tempo === presetTempo}
               onClick={() => handleTempoChange(presetTempo)}
             >
               {presetTempo}
-            </button>
+            </PresetButton>
           ))}
-        </div>
-      </div>
+        </TempoPresets>
+      </TempoControl>
 
-      <button onClick={() => onPlayingChange(!isPlaying)}>
-        {isPlaying ? '停止' : '开始'}
-      </button>
-    </div>
+      <Button onClick={() => onPlayingChange(!isPlaying)}>
+        {isPlaying ? "停止" : "开始"}
+      </Button>
+    </Controls>
   );
-}; 
+};

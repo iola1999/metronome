@@ -1,5 +1,5 @@
-import { Global, css } from '@emotion/react';
-import { Theme } from './theme';
+import { Global, css } from "@emotion/react";
+import { Theme } from "./theme";
 
 export const GlobalStyles = ({ theme }: { theme: Theme }) => (
   <Global
@@ -11,7 +11,8 @@ export const GlobalStyles = ({ theme }: { theme: Theme }) => (
       }
 
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -46,4 +47,4 @@ export const GlobalStyles = ({ theme }: { theme: Theme }) => (
       }
     `}
   />
-); 
+);
