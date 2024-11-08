@@ -19,15 +19,22 @@ body {
     min-height: 100vh;
     background-color: var(--background-color);
     color: var(--primary-color);
+    overflow: hidden;
+    touch-action: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    padding-top: 0;
 }
 
 .container {
     background: var(--surface-color);
-    padding: 2rem;
+    padding: 1.5rem;
     border-radius: 2rem;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    width: 90%;
-    max-width: 400px;
+    width: 95%;
+    max-width: 450px;
+    margin-top: -5vh;
 }
 
 .metronome-face {
@@ -39,33 +46,44 @@ body {
     align-items: center;
 }
 
+.pendulum-container {
+    height: 100px;
+    position: relative;
+    margin-bottom: 0.5rem;
+    overflow: hidden;
+}
+
 .pendulum {
     position: absolute;
+    left: 50%;
+    top: 0;
     width: 4px;
-    height: 160px;
+    height: 80px;
     transform-origin: top center;
+    transform: translateX(-50%);
 }
 
 .pendulum-arm {
     width: 100%;
     height: 100%;
-    background-color: var(--primary-color);
+    background: linear-gradient(to bottom, #007AFF, #0056b3);
 }
 
 .pendulum-bob {
-    width: 30px;
-    height: 30px;
-    background-color: var(--accent-color);
-    border-radius: 50%;
     position: absolute;
-    bottom: -15px;
+    bottom: -12px;
     left: 50%;
+    width: 24px;
+    height: 24px;
+    background: #007AFF;
+    border-radius: 50%;
     transform: translateX(-50%);
+    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
 }
 
 .tempo-display {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 }
 
 #tempo-value {
@@ -82,34 +100,42 @@ body {
 .controls {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 1rem;
+}
+
+.tempo-control {
+    padding: 0.5rem 1rem;
+    margin: 0.5rem -1rem;
+    touch-action: none;
 }
 
 input[type="range"] {
-    width: 100%;
-    height: 6px;
     -webkit-appearance: none;
-    background: var(--background-color);
-    border-radius: 3px;
-    outline: none;
+    width: 100%;
+    height: 40px;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 8px;
+    background: #E5E5EA;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
 input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 20px;
-    height: 20px;
-    background: var(--accent-color);
+    height: 32px;
+    width: 32px;
     border-radius: 50%;
+    background: #007AFF;
     cursor: pointer;
-}
-
-input[type="number"] {
-    width: 80px;
-    padding: 0.5rem;
-    font-size: 1.1rem;
-    border: 2px solid var(--background-color);
-    border-radius: 0.5rem;
-    text-align: center;
+    margin-top: -12px;
+    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+    border: 2px solid white;
 }
 
 .timer-control {
@@ -146,19 +172,23 @@ button:hover {
 }
 
 @keyframes swing {
-    0% { transform: rotate(-30deg); }
-    100% { transform: rotate(30deg); }
+    0% {
+        transform: translateX(-50%) rotate(-30deg);
+    }
+    100% {
+        transform: translateX(-50%) rotate(30deg);
+    }
 }
 
 .pendulum.active {
-    animation: swing calc(60s / var(--bpm)) infinite alternate ease-in-out;
+    animation: swing calc(60s / var(--tempo)) infinite ease-in-out alternate;
 }
 
 .beat-indicator {
     display: flex;
     justify-content: center;
     gap: 1rem;
-    margin: 1rem 0;
+    margin: 0.5rem 0;
 }
 
 .beat {
@@ -368,7 +398,7 @@ button:hover {
 }
 
 .record-btn, .show-recordings-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
@@ -376,11 +406,13 @@ button:hover {
   border-radius: 32px;
   border: none;
   font-size: 16px;
-  line-height: 1;
   height: 40px;
+  line-height: 40px;
   white-space: nowrap;
   min-width: 100px;
   transition: all 0.3s ease;
+  margin: 0;
+  vertical-align: middle;
 }
 
 .record-btn {
@@ -399,6 +431,8 @@ button:hover {
   border-radius: 50%;
   background: currentColor;
   flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .record-time {
@@ -408,6 +442,8 @@ button:hover {
   min-width: 70px;
   text-align: center;
   line-height: 40px;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .recordings-count {
@@ -416,6 +452,10 @@ button:hover {
   padding: 2px 6px;
   border-radius: 10px;
   font-size: 12px;
+  display: inline-block;
+  min-width: 20px;
+  text-align: center;
+  line-height: 1.2;
 }
 
 /* 播放进度条 */

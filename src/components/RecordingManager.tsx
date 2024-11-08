@@ -249,7 +249,7 @@ export const RecordingManager = () => {
           onClick={() => setShowModal(true)}
         >
           <span className="list-icon"></span>
-          录音列表
+          历史
           {recordings.length > 0 && (
             <span className="recordings-count">{recordings.length}</span>
           )}

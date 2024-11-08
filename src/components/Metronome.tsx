@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 
 declare global {
   interface Window {
@@ -14,12 +14,14 @@ export const Metronome = () => {
   const [currentBeat, setCurrentBeat] = useState(-1);
   const audioContextRef = useRef<AudioContext | null>(null);
   const tickTimeoutRef = useRef<number | null>(null);
+  const beatCountRef = useRef(-1);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     localStorage.setItem("lastTempo", tempo.toString());
   }, [tempo]);
 
-  const playClick = async () => {
+  const playClick = useCallback(async (beatNumber: number) => {
     if (!audioContextRef.current) {
       audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
     }
@@ -28,15 +30,13 @@ export const Metronome = () => {
       await audioContextRef.current.resume();
     }
 
-    const nextBeat = (currentBeat + 1) % 4;
-
     const oscillator = audioContextRef.current.createOscillator();
     const gainNode = audioContextRef.current.createGain();
 
     oscillator.connect(gainNode);
     gainNode.connect(audioContextRef.current.destination);
 
-    if (nextBeat === 0) {
+    if (beatNumber === 0) {
       oscillator.frequency.value = 1500;
       gainNode.gain.value = 0.6;
     } else {
@@ -49,32 +49,37 @@ export const Metronome = () => {
     gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
     oscillator.stop(now + 0.1);
 
-    setCurrentBeat(nextBeat);
-  };
+    setCurrentBeat(beatNumber);
+  }, []);
 
-  const startTicking = () => {
+  const startTicking = useCallback(() => {
     const interval = (60 / tempo) * 1000;
     
     const tick = async () => {
       if (!isPlaying) return;
       
-      await playClick();
+      beatCountRef.current = (beatCountRef.current + 1) % 4;
+      
+      await playClick(beatCountRef.current);
       
       tickTimeoutRef.current = window.setTimeout(tick, interval);
     };
 
+    beatCountRef.current = -1;
     tick();
-  };
+  }, [tempo, isPlaying, playClick]);
 
   useEffect(() => {
-    if (isPlaying) {
+    if (isPlaying && !isDragging) {
       startTicking();
     } else {
       if (tickTimeoutRef.current) {
         clearTimeout(tickTimeoutRef.current);
         tickTimeoutRef.current = null;
       }
-      setCurrentBeat(-1);
+      if (!isPlaying) {
+        setCurrentBeat(-1);
+      }
     }
 
     return () => {
@@ -83,15 +88,34 @@ export const Metronome = () => {
         tickTimeoutRef.current = null;
       }
     };
-  }, [isPlaying, tempo]);
+  }, [isPlaying, isDragging, startTicking]);
 
   const handleTempoChange = (newTempo: number) => {
     const clampedTempo = Math.min(Math.max(newTempo, 30), 240);
     setTempo(clampedTempo);
   };
 
+  useEffect(() => {
+    const pendulum = document.querySelector('.pendulum') as HTMLElement;
+    if (pendulum) {
+      pendulum.style.setProperty('--tempo', tempo.toString());
+      if (isPlaying) {
+        pendulum.classList.add('active');
+      } else {
+        pendulum.classList.remove('active');
+      }
+    }
+  }, [isPlaying, tempo]);
+
   return (
     <div className="controls">
+      <div className="pendulum-container">
+        <div className="pendulum">
+          <div className="pendulum-arm" />
+          <div className="pendulum-bob" />
+        </div>
+      </div>
+
       <div className="tempo-display">
         <span>{tempo}</span>
         <span className="bpm-text">BPM</span>
@@ -112,7 +136,34 @@ export const Metronome = () => {
           min="30"
           max="240"
           value={tempo}
-          onChange={(e) => handleTempoChange(parseInt(e.target.value))}
+          onMouseDown={() => {
+            setIsDragging(true);
+            if (isPlaying) {
+              if (tickTimeoutRef.current) {
+                clearTimeout(tickTimeoutRef.current);
+                tickTimeoutRef.current = null;
+              }
+            }
+          }}
+          onMouseUp={() => {
+            setIsDragging(false);
+          }}
+          onTouchStart={() => {
+            setIsDragging(true);
+            if (isPlaying) {
+              if (tickTimeoutRef.current) {
+                clearTimeout(tickTimeoutRef.current);
+                tickTimeoutRef.current = null;
+              }
+            }
+          }}
+          onTouchEnd={() => {
+            setIsDragging(false);
+          }}
+          onChange={(e) => {
+            const newTempo = parseInt(e.target.value);
+            handleTempoChange(newTempo);
+          }}
         />
         <div className="tempo-presets">
           {[60, 90, 120, 160].map((presetTempo) => (
