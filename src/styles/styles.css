@@ -25,6 +25,8 @@ body {
     width: 100%;
     height: 100%;
     padding-top: 0;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: none;
 }
 
 .container {
@@ -303,12 +305,18 @@ button:hover {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 1000;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: none;
+    touch-action: none;
 }
 
 .modal.show {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: fixed;
+    overflow: hidden;
+    touch-action: none;
 }
 
 .modal-content {
@@ -320,6 +328,9 @@ button:hover {
     max-height: 70vh;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    position: relative;
+    touch-action: pan-y;
 }
 
 .modal-header {
@@ -327,6 +338,7 @@ button:hover {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1rem;
+    position: relative;
 }
 
 .close-btn {
@@ -341,6 +353,8 @@ button:hover {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
 }
 
 .recording-item {
@@ -776,4 +790,27 @@ button:hover {
 .delete-button:hover {
   background: rgba(255, 59, 48, 0.2);
   transform: scale(1.05);
+}
+
+.modal-close-btn {
+  width: 32px;
+  height: 32px;
+  background: #f1f1f1;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: all 0.2s ease;
+  position: absolute;
+  right: -8px;
+  top: -8px;
+}
+
+.modal-close-btn:hover {
+  background: #e5e5e5;
+  transform: scale(1.1);
 }
