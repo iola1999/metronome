@@ -13,6 +13,7 @@ import {
   TempoSlider,
   TempoPresets,
   PresetButton,
+  TempoNumber,
 } from "../styles/components/MetronomeStyles";
 import { Button } from "../styles/components";
 
@@ -36,6 +37,7 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
   const tickTimeoutRef = useRef<number | null>(null);
   const beatCountRef = useRef(-1);
   const [isDragging, setIsDragging] = useState(false);
+  const [isTempoChanging, setIsTempoChanging] = useState(false);
 
   useEffect(() => {
     localStorage.setItem("lastTempo", tempo.toString());
@@ -114,6 +116,9 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
   const handleTempoChange = (newTempo: number) => {
     const clampedTempo = Math.min(Math.max(newTempo, 30), 240);
     setTempo(clampedTempo);
+    
+    setIsTempoChanging(true);
+    setTimeout(() => setIsTempoChanging(false), 300);
   };
 
   return (
@@ -129,7 +134,9 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
       </PendulumContainer>
 
       <TempoDisplay>
-        <span>{tempo}</span>
+        <TempoNumber className={isTempoChanging ? 'changing' : ''}>
+          {tempo}
+        </TempoNumber>
         <BpmText>BPM</BpmText>
       </TempoDisplay>
 

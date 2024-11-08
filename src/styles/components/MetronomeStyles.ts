@@ -61,12 +61,42 @@ export const PendulumBob = styled.div`
 export const TempoDisplay = styled.div`
   text-align: center;
   margin-bottom: ${({ theme }) => theme.spacing.sm};
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: ${({ theme }) => theme.spacing.xs};
+`;
+
+export const TempoNumber = styled.span`
+  font-size: 3rem;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.primary};
+  line-height: 1;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &.changing {
+    animation: tempoChange 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @keyframes tempoChange {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.2);
+      color: ${({ theme }) => theme.colors.accent};
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
 `;
 
 export const BpmText = styled.span`
   font-size: 1rem;
-  opacity: 0.7;
+  opacity: 0.6;
   margin-left: ${({ theme }) => theme.spacing.xs};
+  font-weight: 500;
 `;
 
 export const BeatIndicator = styled.div`
@@ -143,11 +173,16 @@ export const PresetButton = styled.button<{ active?: boolean }>`
     active ? theme.colors.accent : theme.colors.background};
   color: ${({ theme, active }) => (active ? "white" : theme.colors.primary)};
   border-radius: ${({ theme }) => theme.borderRadius.sm};
-  transition: ${({ theme }) => theme.transitions.default};
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
 
   &:hover {
     background-color: ${({ theme }) => theme.colors.accent};
     color: white;
     transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 `;
