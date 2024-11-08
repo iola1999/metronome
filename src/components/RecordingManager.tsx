@@ -130,7 +130,7 @@ export const RecordingManager = ({
     setRecordings(records.reverse());
   };
 
-  // 获取支���的 MIME 类型
+  // 获取支持的 MIME 类型
   const getSupportedMimeType = () => {
     const types = [
       "audio/webm;codecs=opus",

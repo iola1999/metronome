@@ -31,7 +31,7 @@ export const RecordingMainControls = styled.div`
   -webkit-backdrop-filter: blur(10px);
 `;
 
-export const RecordButton = styled.button<{ recording?: boolean }>`
+export const RecordButton = styled.button<{ recording: boolean }>`
   flex: 1;
   min-width: 120px;
   max-width: 160px;
@@ -45,28 +45,11 @@ export const RecordButton = styled.button<{ recording?: boolean }>`
   font-size: 16px;
   height: 40px;
   white-space: nowrap;
-  transition: ${({ theme }) => theme.transitions.default};
+  transition: all 0.3s ease;
   background: ${({ theme, recording }) =>
     recording ? theme.colors.error : theme.colors.accent};
   color: white;
-
-  ${({ recording }) =>
-    recording &&
-    `
-    animation: pulse 1.5s infinite;
-
-    @keyframes pulse {
-      0% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.05);
-      }
-      100% {
-        transform: scale(1);
-      }
-    }
-  `}
+  position: relative;
 `;
 
 export const RecordIcon = styled.span`
@@ -79,12 +62,19 @@ export const RecordIcon = styled.span`
 `;
 
 export const RecordTime = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: ${({ theme }) => theme.colors.primary};
-  font-size: 18px;
-  line-height: 1;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: ${({ theme }) => theme.colors.accent};
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeInUp 0.3s forwards;
+
+  @keyframes fadeInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 `;
 
 export const ShowRecordingsButton = styled.button`
