@@ -11,18 +11,24 @@ export const Metronome = () => {
     parseInt(localStorage.getItem("lastTempo") || "120")
   );
   const [isPlaying, setIsPlaying] = useState(false);
+  const [currentBeat, setCurrentBeat] = useState(-1);
   const audioContextRef = useRef<AudioContext | null>(null);
   const tickTimeoutRef = useRef<number | null>(null);
-  const currentBeatRef = useRef(0);
 
   useEffect(() => {
     localStorage.setItem("lastTempo", tempo.toString());
   }, [tempo]);
 
   const playClick = async () => {
-    if (!audioContextRef.current) return;
+    if (!audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+    }
 
-    currentBeatRef.current = (currentBeatRef.current + 1) % 4;
+    if (audioContextRef.current.state === 'suspended') {
+      await audioContextRef.current.resume();
+    }
+
+    const nextBeat = (currentBeat + 1) % 4;
 
     const oscillator = audioContextRef.current.createOscillator();
     const gainNode = audioContextRef.current.createGain();
@@ -30,7 +36,7 @@ export const Metronome = () => {
     oscillator.connect(gainNode);
     gainNode.connect(audioContextRef.current.destination);
 
-    if (currentBeatRef.current === 0) {
+    if (nextBeat === 0) {
       oscillator.frequency.value = 1500;
       gainNode.gain.value = 0.6;
     } else {
@@ -42,51 +48,46 @@ export const Metronome = () => {
     oscillator.start(now);
     gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
     oscillator.stop(now + 0.1);
+
+    setCurrentBeat(nextBeat);
   };
 
-  const start = async () => {
-    if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
-    }
-
-    setIsPlaying(true);
+  const startTicking = () => {
     const interval = (60 / tempo) * 1000;
-    await playClick();
-
+    
     const tick = async () => {
       if (!isPlaying) return;
-
-      if (tickTimeoutRef.current) {
-        clearTimeout(tickTimeoutRef.current);
-      }
-
-      tickTimeoutRef.current = window.setTimeout(async () => {
-        if (isPlaying) {
-          await playClick();
-          tick();
-        }
-      }, interval);
+      
+      await playClick();
+      
+      tickTimeoutRef.current = window.setTimeout(tick, interval);
     };
 
     tick();
   };
 
-  const stop = () => {
-    setIsPlaying(false);
-    if (tickTimeoutRef.current) {
-      clearTimeout(tickTimeoutRef.current);
-      tickTimeoutRef.current = null;
+  useEffect(() => {
+    if (isPlaying) {
+      startTicking();
+    } else {
+      if (tickTimeoutRef.current) {
+        clearTimeout(tickTimeoutRef.current);
+        tickTimeoutRef.current = null;
+      }
+      setCurrentBeat(-1);
     }
-    currentBeatRef.current = -1;
-  };
+
+    return () => {
+      if (tickTimeoutRef.current) {
+        clearTimeout(tickTimeoutRef.current);
+        tickTimeoutRef.current = null;
+      }
+    };
+  }, [isPlaying, tempo]);
 
   const handleTempoChange = (newTempo: number) => {
     const clampedTempo = Math.min(Math.max(newTempo, 30), 240);
     setTempo(clampedTempo);
-    if (isPlaying) {
-      stop();
-      start();
-    }
   };
 
   return (
@@ -100,7 +101,7 @@ export const Metronome = () => {
         {[0, 1, 2, 3].map((beat) => (
           <div
             key={beat}
-            className={`beat ${beat === currentBeatRef.current ? 'active' : ''}`}
+            className={`beat ${currentBeat === beat ? 'active' : ''} ${beat === 0 ? 'first-beat' : ''}`}
           />
         ))}
       </div>
@@ -126,7 +127,7 @@ export const Metronome = () => {
         </div>
       </div>
 
-      <button onClick={isPlaying ? stop : start}>
+      <button onClick={() => setIsPlaying(!isPlaying)}>
         {isPlaying ? '停止' : '开始'}
       </button>
     </div>
