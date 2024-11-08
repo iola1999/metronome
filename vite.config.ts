@@ -49,13 +49,6 @@ export default defineConfig({
             form_factor: "wide",
           },
         ],
-        shortcuts: [
-          {
-            name: "开始录音",
-            url: "/?action=record",
-            icons: [{ src: "/icons/record.png", sizes: "96x96" }],
-          },
-        ],
         related_applications: [],
         prefer_related_applications: false,
       },
