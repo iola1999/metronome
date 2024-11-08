@@ -1,7 +1,7 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { App } from './App';
-import './styles/styles.css';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { App } from "./App";
+import "./styles/styles.css";
 
 // 注册 Service Worker
 if ("serviceWorker" in navigator) {
@@ -13,8 +13,8 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>
-); 
+);
