@@ -73,7 +73,7 @@ export const TempoNumber = styled.span`
   color: ${({ theme }) => theme.colors.primary};
   line-height: 1;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  
+
   &.changing {
     animation: tempoChange 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -137,13 +137,14 @@ export const TempoSlider = styled.input`
   background: transparent;
   padding: 0;
   margin: 0;
+  cursor: pointer;
 
   &::-webkit-slider-runnable-track {
     width: 100%;
     height: 8px;
     background: ${({ theme }) => `${theme.colors.background}cc`};
     border-radius: ${({ theme }) => theme.borderRadius.sm};
-    cursor: pointer;
+    border: none;
   }
 
   &::-webkit-slider-thumb {
@@ -156,6 +157,15 @@ export const TempoSlider = styled.input`
     margin-top: -12px;
     box-shadow: ${({ theme }) => theme.shadows.sm};
     border: 2px solid white;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
   }
 `;
 
