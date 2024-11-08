@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Recording } from "../util/db";
 
 interface RecordingItemProps {
@@ -19,6 +19,33 @@ export const RecordingItem = ({
   onDelete,
 }: RecordingItemProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // 当显示删除确认时，5秒后自动重置
+  useEffect(() => {
+    let timer: number;
+    if (showDeleteConfirm) {
+      timer = window.setTimeout(() => {
+        setShowDeleteConfirm(false);
+      }, 5000);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [showDeleteConfirm]);
+
+  const handleDeleteClick = async () => {
+    if (!recording.id) return;
+    
+    if (!showDeleteConfirm) {
+      setShowDeleteConfirm(true);
+      return;
+    }
+
+    setIsDeleting(true);
+    setShowDeleteConfirm(false);
+    await onDelete(recording.id);
+  };
 
   const formatDate = (date: Date) => {
     const now = new Date();
@@ -67,12 +94,6 @@ export const RecordingItem = ({
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}'${remainingSeconds.toString().padStart(2, "0")}"`;
-  };
-
-  const handleDelete = async () => {
-    if (!recording.id) return;
-    setIsDeleting(true);
-    await onDelete(recording.id);
   };
 
   const handleShare = async () => {
@@ -188,23 +209,35 @@ export const RecordingItem = ({
               </svg>
             </button>
             <button
-              className="control-button delete-button"
-              onClick={handleDelete}
-              title="删除"
+              className={`control-button delete-button ${showDeleteConfirm ? "confirming" : ""}`}
+              onClick={handleDeleteClick}
+              title={showDeleteConfirm ? "再次点击确认删除" : "删除"}
             >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <path d="M3 6h18" />
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                <line x1="10" y1="11" x2="10" y2="17" />
-                <line x1="14" y1="11" x2="14" y2="17" />
-              </svg>
+              {showDeleteConfirm ? (
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+              ) : (
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <path d="M3 6h18" />
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                  <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  <line x1="10" y1="11" x2="10" y2="17" />
+                  <line x1="14" y1="11" x2="14" y2="17" />
+                </svg>
+              )}
             </button>
           </div>
         </div>

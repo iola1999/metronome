@@ -656,11 +656,36 @@ button:hover {
   color: #FF3B30;
   opacity: 0.7;
   background: rgba(255, 59, 48, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.delete-button.confirming {
+  color: #FF3B30;
+  opacity: 1;
+  background: rgba(255, 59, 48, 0.2);
+  animation: pulse-delete 1.5s infinite;
+}
+
+@keyframes pulse-delete {
+  0% {
+    transform: scale(1);
+    background: rgba(255, 59, 48, 0.2);
+  }
+  50% {
+    transform: scale(1.05);
+    background: rgba(255, 59, 48, 0.3);
+  }
+  100% {
+    transform: scale(1);
+    background: rgba(255, 59, 48, 0.2);
+  }
 }
 
 .delete-button:hover {
   opacity: 1;
   background: rgba(255, 59, 48, 0.2);
+  transform: scale(1.05);
 }
 
 .playback-progress {
