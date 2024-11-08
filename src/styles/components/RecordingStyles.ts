@@ -128,8 +128,28 @@ export const RecordingsList = styled.div`
     ${({ theme }) => theme.spacing.md} + env(safe-area-inset-bottom, 0)
   );
   overflow-y: auto;
+  flex: 1;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+
+  /* 美化滚动条 */
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: ${({ theme }) => `${theme.colors.background}40`};
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: ${({ theme }) => `${theme.colors.primary}20`};
+    border-radius: 4px;
+
+    &:hover {
+      background: ${({ theme }) => `${theme.colors.primary}40`};
+    }
+  }
 `;
 
 export const NoRecordings = styled.div`
@@ -146,11 +166,15 @@ export const RecordingItemContainer = styled.div<{
   background: ${({ theme }) => theme.colors.surface};
   border-radius: ${({ theme }) => theme.borderRadius.md};
   padding: ${({ theme }) => theme.spacing.md};
-  padding-right: ${({ theme }) => theme.spacing.lg};
   margin-bottom: ${({ theme }) => theme.spacing.sm};
   box-shadow: ${({ theme }) => theme.shadows.sm};
   transition: ${({ theme }) => theme.transitions.default};
   overflow: hidden;
+  flex-shrink: 0;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 
   &:hover {
     transform: translateY(-2px);
@@ -162,6 +186,7 @@ export const RecordingItemContainer = styled.div<{
     `
     background: linear-gradient(135deg, ${theme.colors.surface} 0%, ${theme.colors.background} 100%);
     border-left: 4px solid ${theme.colors.accent};
+    padding-left: calc(${theme.spacing.md} - 4px);
   `}
 
   ${({ deleting }) =>
@@ -185,6 +210,7 @@ export const RecordingInfo = styled.div`
   align-items: center;
   width: 100%;
   gap: ${({ theme }) => theme.spacing.md};
+  padding-bottom: ${({ theme }) => theme.spacing.xs};
 `;
 
 export const RecordingTime = styled.div`
@@ -211,23 +237,23 @@ export const RecordingDuration = styled.div`
 
 export const RecordingControls = styled.div`
   display: flex;
-  gap: ${({ theme }) => theme.spacing.md};
+  gap: ${({ theme }) => theme.spacing.xs};
   margin-left: auto;
   flex-shrink: 0;
-  padding-right: 8px;
+  padding-right: 0;
 `;
 
 // 播放进度条
 export const PlaybackProgress = styled.div`
   position: relative;
+  margin-top: ${({ theme }) => theme.spacing.xs};
 `;
 
 export const ProgressBar = styled.div`
-  height: 4px;
+  height: 3px;
   background: ${({ theme }) => `${theme.colors.accent}1a`};
   border-radius: ${({ theme }) => theme.borderRadius.sm};
   overflow: hidden;
-  margin-bottom: ${({ theme }) => theme.spacing.sm};
 `;
 
 export const ProgressFill = styled.div<{ progress: number }>`

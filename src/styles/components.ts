@@ -110,8 +110,9 @@ export const Modal = styled.div<{ isOpen: boolean }>`
   align-items: center;
   justify-content: center;
   overscroll-behavior: none;
-  -webkit-overflow-scrolling: none;
+  -webkit-overflow-scrolling: touch;
   touch-action: none;
+  padding: ${({ theme }) => theme.spacing.md};
 `;
 
 export const ModalContent = styled.div`
@@ -119,9 +120,10 @@ export const ModalContent = styled.div`
   border-radius: ${({ theme }) => theme.borderRadius.md};
   width: 90%;
   max-width: 500px;
-  max-height: 70vh;
+  height: min(600px, 80vh);
   display: flex;
   flex-direction: column;
+  position: relative;
   overflow: hidden;
 `;
 
@@ -131,10 +133,11 @@ export const ModalHeader = styled.div`
   align-items: center;
   padding: ${({ theme }) => theme.spacing.md};
   border-bottom: 1px solid ${({ theme }) => `${theme.colors.primary}1a`};
-  position: sticky;
-  top: 0;
+  flex-shrink: 0;
   background: ${({ theme }) => theme.colors.surface};
   z-index: 1;
+  border-top-left-radius: ${({ theme }) => theme.borderRadius.md};
+  border-top-right-radius: ${({ theme }) => theme.borderRadius.md};
 
   h2 {
     margin: 0;
