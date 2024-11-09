@@ -13,12 +13,12 @@ export const PendulumContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  padding-top: 20px;
+  padding-top: 40px;
 `;
 
 export const PendulumArm = styled.div`
   width: 4px;
-  height: 140px;
+  height: 120px;
   background: linear-gradient(to right, #666666, #999999, #666666);
   position: absolute;
   bottom: 10px;
@@ -33,7 +33,7 @@ export const PendulumBob = styled.div`
   height: 40px;
   position: absolute;
   left: 50%;
-  bottom: 140px;
+  bottom: 120px;
   transform: translateX(-50%);
   background: linear-gradient(to right,
     #d0d0d0,
@@ -75,9 +75,9 @@ export const Pendulum = styled.div`
   }
 
   @keyframes swing {
-    0% { transform: rotate(30deg); }
-    50% { transform: rotate(-30deg); }
-    100% { transform: rotate(30deg); }
+    0% { transform: rotate(calc(min(20deg, 15deg * (120 / var(--tempo))))); }
+    50% { transform: rotate(calc(max(-20deg, -15deg * (120 / var(--tempo))))); }
+    100% { transform: rotate(calc(min(20deg, 15deg * (120 / var(--tempo))))); }
   }
 `;
 

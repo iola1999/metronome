@@ -35,16 +35,16 @@ const METRONOME_CONFIG = {
     MIN: 30,
     MAX: 180,
     DEFAULT: 120,
-    PRESETS: [60, 90, 120, 140] as const
+    PRESETS: [60, 90, 120, 140] as const,
   },
   SWING: {
     ANGLE: 30, // 摆动角度
-    DURATION_FORMULA: 60 // 用于计算摆动周期：DURATION_FORMULA / tempo
+    DURATION_FORMULA: 60, // 用于计算摆动周期：DURATION_FORMULA / tempo
   },
   PENDULUM: {
-    MIN_POS: 20,  // 配重块最高位置
-    MAX_POS: 140  // 配重块最低位置
-  }
+    MIN_POS: 40,
+    MAX_POS: 100,
+  },
 } as const;
 
 export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
@@ -209,7 +209,7 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
   const calculateBobPosition = useCallback((currentTempo: number) => {
     const { MIN_POS, MAX_POS } = METRONOME_CONFIG.PENDULUM;
     const { MIN, MAX } = METRONOME_CONFIG.BPM;
-    
+
     const position =
       MIN_POS + ((currentTempo - MIN) / (MAX - MIN)) * (MAX_POS - MIN_POS);
     return Math.round(position);
