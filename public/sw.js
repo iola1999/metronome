@@ -11,6 +11,9 @@ async function checkForUpdates() {
     const freshResponse = await fetch("/", { cache: "no-cache" });
     if (!freshResponse.ok) return false;
 
+    // 如果检测到更新，直接更新缓存
+    await currentCache.put("/", freshResponse.clone());
+
     const cachedText = await cachedResponse.text();
     const freshText = await freshResponse.text();
 

@@ -7,6 +7,7 @@ import { RecordingManager } from "./components/RecordingManager";
 import { useState, lazy, Suspense, useTransition, useEffect } from "react";
 import { SettingsButton } from "./components/SettingsButton";
 import { Settings } from "./components/Settings";
+import { message } from "./components/Message";
 
 // 懒加载 MessageContainer
 const MessageContainer = lazy(() => import("./components/MessageContainer"));
@@ -32,21 +33,19 @@ export const App = () => {
 
   useEffect(() => {
     // 检查是否支持 Service Worker
-    if ('serviceWorker' in navigator) {
+    if ("serviceWorker" in navigator) {
       // 注册更新检查的消息监听
-      navigator.serviceWorker.addEventListener('message', (event) => {
-        if (event.data.type === 'UPDATE_AVAILABLE') {
-          // 显示更新提示
-          if (confirm('发现新版本，是否刷新页面？')) {
-            window.location.reload();
-          }
+      navigator.serviceWorker.addEventListener("message", (event) => {
+        if (event.data.type === "UPDATE_AVAILABLE") {
+          // 显示消息提示而不是确认框
+          message.info("应用已更新");
         }
       });
 
       // 页面加载时检查更新
       const checkForUpdates = async () => {
         const registration = await navigator.serviceWorker.ready;
-        registration.active?.postMessage('CHECK_UPDATES');
+        registration.active?.postMessage("CHECK_UPDATES");
       };
 
       checkForUpdates();
