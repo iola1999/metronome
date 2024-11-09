@@ -57,6 +57,7 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
   const [isTempoChanging, setIsTempoChanging] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isPendulumActive, setIsPendulumActive] = useState(false);
+  const timeoutIdsRef = useRef<number[]>([]);
 
   useEffect(() => {
     const savedTempo =
@@ -84,6 +85,10 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
       await audioContextRef.current.resume();
     }
 
+    const now = audioContextRef.current.currentTime;
+    const isAccent = accentFirst && beatNumber === 0;
+
+    // 创建音频节点
     const oscillator = audioContextRef.current.createOscillator();
     const gainNode = audioContextRef.current.createGain();
 
@@ -93,26 +98,24 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
     const getSoundFrequency = (isAccent: boolean) => {
       switch (soundType) {
         case "beep":
-          return isAccent ? 1800 : 1200; // 电子音 - 高频
+          return isAccent ? 1800 : 1200;
         case "wood":
-          return isAccent ? 180 : 120; // 木鱼音 - 低频
+          return isAccent ? 180 : 120;
         case "click":
         default:
-          return isAccent ? 1500 : 1000; // 点击音 - 中频
+          return isAccent ? 1500 : 1000;
       }
     };
 
-    const now = audioContextRef.current.currentTime;
-    const isAccent = accentFirst && beatNumber === 0;
-
     oscillator.frequency.value = getSoundFrequency(isAccent);
     const clickVolume = isAccent ? volume * accentVolume : volume;
-    gainNode.gain.value = clickVolume;
+
+    // 使用精确的时间调度
+    gainNode.gain.setValueAtTime(clickVolume, now);
 
     switch (soundType) {
       case "beep":
         oscillator.start(now);
-        gainNode.gain.setValueAtTime(gainNode.gain.value, now);
         gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
         oscillator.stop(now + 0.15);
         break;
@@ -124,7 +127,6 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
 
         oscillator.start(now);
         lowOscillator.start(now);
-        gainNode.gain.setValueAtTime(gainNode.gain.value, now);
         gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
         oscillator.stop(now + 0.08);
         lowOscillator.stop(now + 0.08);
@@ -133,7 +135,6 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
       case "click":
       default:
         oscillator.start(now);
-        gainNode.gain.setValueAtTime(gainNode.gain.value, now);
         gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
         oscillator.stop(now + 0.05);
         break;
@@ -142,98 +143,95 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
     setCurrentBeat(beatNumber);
   }, []);
 
-  const startTicking = useCallback(() => {
-    // 清除现有的定时器
+  const clearAllTimeouts = useCallback(() => {
+    // 清除主定时器
     if (tickTimeoutRef.current) {
       clearTimeout(tickTimeoutRef.current);
       tickTimeoutRef.current = null;
     }
-    
+
+    // 清除所有存储的定时器
+    timeoutIdsRef.current.forEach((id) => clearTimeout(id));
+    timeoutIdsRef.current = [];
+
+    // 重置状态
+    beatCountRef.current = -1;
+    setCurrentBeat(-1);
+    setIsPendulumActive(false);
+  }, []);
+
+  const startTicking = useCallback(() => {
     const currentTempo = tempo ?? METRONOME_CONFIG.BPM.DEFAULT;
     const interval = (60 / currentTempo) * 2000;
 
-    // 重置节拍计数
-    beatCountRef.current = -1;
-    setCurrentBeat(-1);
-
-    const tick = async () => {
+    const tick = () => {
       if (!isPlaying) return;
 
-      // 设置下一次的完整周期定时器
-      tickTimeoutRef.current = window.setTimeout(tick, interval);
-
-      // 计算摆锤从一边到中间的时间（四分之一周期）
       const quarterPeriod = interval / 4;
 
-      // 等待摆锤到达中间位置
-      setTimeout(async () => {
+      // 第一拍
+      const firstBeatTimeout = setTimeout(() => {
         beatCountRef.current = (beatCountRef.current + 1) % 4;
-        await playClick(beatCountRef.current);
-      }, quarterPeriod);
+        playClick(beatCountRef.current);
+      }, quarterPeriod) as unknown as number;
 
-      // 等待摆锤从另一边到达中间位置
-      setTimeout(async () => {
+      // 第二拍
+      const secondBeatTimeout = setTimeout(() => {
         beatCountRef.current = (beatCountRef.current + 1) % 4;
-        await playClick(beatCountRef.current);
-      }, quarterPeriod * 3);
+        playClick(beatCountRef.current);
+      }, quarterPeriod * 3) as unknown as number;
+
+      // 存储定时器ID
+      timeoutIdsRef.current.push(firstBeatTimeout, secondBeatTimeout);
+
+      // 下一个周期
+      tickTimeoutRef.current = window.setTimeout(tick, interval);
     };
 
+    // 开始新的周期前先清理
+    clearAllTimeouts();
+    setIsPendulumActive(true);
     tick();
-  }, [tempo, isPlaying, playClick]);
+  }, [tempo, isPlaying, playClick, clearAllTimeouts]);
 
   useEffect(() => {
     if (isPlaying && !isDragging) {
-      setIsPendulumActive(true);
-      startTicking();
+      requestAnimationFrame(() => {
+        setIsPendulumActive(true);
+        startTicking();
+      });
     } else {
-      setIsPendulumActive(false);
-      if (tickTimeoutRef.current) {
-        clearTimeout(tickTimeoutRef.current);
-        tickTimeoutRef.current = null;
-      }
-      if (!isPlaying) {
-        setCurrentBeat(-1);
-      }
+      clearAllTimeouts();
     }
 
     return () => {
-      if (tickTimeoutRef.current) {
-        clearTimeout(tickTimeoutRef.current);
-        tickTimeoutRef.current = null;
-      }
+      clearAllTimeouts();
     };
-  }, [isPlaying, isDragging, startTicking]);
+  }, [isPlaying, isDragging, startTicking, clearAllTimeouts]);
 
   const handleTempoChange = (newTempo: number) => {
     const clampedTempo = Math.min(
       Math.max(newTempo, METRONOME_CONFIG.BPM.MIN),
       METRONOME_CONFIG.BPM.MAX
     );
-    
-    // 重置所有状态
-    if (tickTimeoutRef.current) {
-      clearTimeout(tickTimeoutRef.current);
-      tickTimeoutRef.current = null;
-    }
-    beatCountRef.current = -1;
-    setCurrentBeat(-1);
-    
-    // 更新tempo
+
+    // 先停止所有计时器
+    clearAllTimeouts();
+
+    // 更新 tempo
     setTempo(clampedTempo);
     setIsTempoChanging(true);
-    
-    // 只有在非拖动状态下且正在播放时，才重新开始
+
+    // 如果正在播放，重新开始
     if (isPlaying && !isDragging) {
-      setTimeout(() => {
-        startTicking();
-      }, 0);
+      startTicking();
     }
-    
+
     setTimeout(() => setIsTempoChanging(false), 300);
   };
 
-  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleTempoChange(parseInt(e.target.value));
+  const handleSliderChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    await handleTempoChange(parseInt(e.target.value));
   };
 
   // 修改配重块位置计算逻辑
@@ -248,20 +246,16 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
 
   const handleSliderMouseDown = () => {
     setIsDragging(true);
-    setIsPendulumActive(false);
-    if (tickTimeoutRef.current) {
-      clearTimeout(tickTimeoutRef.current);
-      tickTimeoutRef.current = null;
-    }
-    beatCountRef.current = -1;
-    setCurrentBeat(-1);
+    clearAllTimeouts();
   };
 
   const handleSliderMouseUp = () => {
     setIsDragging(false);
     if (isPlaying) {
-      setIsPendulumActive(true);
-      startTicking();
+      requestAnimationFrame(() => {
+        setIsPendulumActive(true);
+        startTicking();
+      });
     }
   };
 
@@ -320,7 +314,9 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
             <PresetButton
               key={presetTempo}
               isSelected={Number(tempo) === presetTempo}
-              onClick={() => handleTempoChange(presetTempo)}
+              onClick={async () => {
+                await handleTempoChange(presetTempo);
+              }}
             >
               {presetTempo}
             </PresetButton>
