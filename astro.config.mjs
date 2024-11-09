@@ -79,8 +79,6 @@ export default defineConfig({
           related_applications: [],
           prefer_related_applications: false,
         },
-        injectRegister: null,
-        strategies: "injectManifest",
         srcDir: "public",
         filename: "sw.js",
         devOptions: {
