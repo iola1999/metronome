@@ -25,7 +25,7 @@ export const RecordingList = ({
   playProgress,
 }: RecordingListProps) => {
   const handleClose = () => {
-    if (playingId !== null) {
+    if (playingId !== null && isPlaying) {
       const playingRecording = recordings.find((r) => r.id === playingId);
       if (playingRecording) {
         onPlayToggle(playingRecording);
