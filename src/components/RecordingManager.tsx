@@ -11,6 +11,7 @@ import {
   RecordingsCount,
   RecordingLabel,
 } from "../styles/components/RecordingStyles";
+import { MdMic } from "react-icons/md";
 
 interface RecordingManagerProps {
   onPlaybackStart: () => void;
@@ -301,7 +302,9 @@ export const RecordingManager = ({
   return (
     <RecordingControlsContainer>
       <RecordingMainControls>
-        <RecordingLabel>录音</RecordingLabel>
+        <RecordingLabel>
+          <MdMic size={16} />
+        </RecordingLabel>
         <RecordButton
           recording={isRecording}
           onClick={isRecording ? stopRecording : startRecording}

@@ -15,15 +15,15 @@ export const RecordingControlsContainer = styled.div`
 `;
 
 export const RecordingMainControls = styled.div`
-  display: flex;
+  display: grid;
+  grid-template-columns: 40px 1fr 1fr;
   gap: 16px;
   align-items: center;
-  justify-content: center;
   background: ${({ theme }) => `${theme.colors.surface}f2`};
-  padding: ${({ theme }) => `${theme.spacing.sm} ${theme.spacing.md}`};
+  padding: ${({ theme }) => `${theme.spacing.xs} ${theme.spacing.md}`};
   border-radius: ${({ theme }) => theme.borderRadius.full};
   box-shadow: ${({ theme }) => theme.shadows.md};
-  height: 64px;
+  height: 56px;
   width: 100%;
   max-width: 500px;
   margin: 0 auto;
@@ -33,18 +33,17 @@ export const RecordingMainControls = styled.div`
 `;
 
 export const RecordingLabel = styled.span`
-  position: absolute;
-  left: 24px;
-  top: -20px;
-  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: ${({ theme }) => theme.colors.primary}99;
-  background: ${({ theme }) => theme.colors.surface};
-  padding: 2px 8px;
-  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
 `;
 
 export const RecordButton = styled.button<{ recording: boolean }>`
-  flex: 1;
+  height: 40px;
   min-width: 120px;
   max-width: 160px;
   display: inline-flex;
@@ -55,13 +54,11 @@ export const RecordButton = styled.button<{ recording: boolean }>`
   border-radius: ${({ theme }) => theme.borderRadius.full};
   border: none;
   font-size: 16px;
-  height: 40px;
   white-space: nowrap;
   transition: all 0.3s ease;
   background: ${({ theme, recording }) =>
     recording ? theme.colors.error : theme.colors.accent};
   color: white;
-  position: relative;
 `;
 
 export const RecordIcon = styled.span`
@@ -90,7 +87,7 @@ export const RecordTime = styled.div`
 `;
 
 export const ShowRecordingsButton = styled.button`
-  flex: 1;
+  height: 40px;
   min-width: 120px;
   max-width: 160px;
   display: inline-flex;
@@ -101,7 +98,6 @@ export const ShowRecordingsButton = styled.button`
   border-radius: ${({ theme }) => theme.borderRadius.full};
   border: none;
   font-size: 16px;
-  height: 40px;
   white-space: nowrap;
   transition: ${({ theme }) => theme.transitions.default};
   background: ${({ theme }) => theme.colors.background};
