@@ -82,10 +82,14 @@ export const ModalCloseButton = styled.button`
   border-radius: ${({ theme }) => theme.borderRadius.full};
   background: ${({ theme }) => `${theme.colors.primary}0a`};
   color: ${({ theme }) => theme.colors.primary};
-  font-size: 24px;
-  line-height: 1;
   transition: ${({ theme }) => theme.transitions.default};
   margin-left: ${({ theme }) => theme.spacing.sm};
+  padding: 0;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
 
   &:hover {
     background: ${({ theme }) => `${theme.colors.primary}1a`};

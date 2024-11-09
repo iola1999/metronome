@@ -61,13 +61,34 @@ export const RecordButton = styled.button<{ recording: boolean }>`
   color: white;
 `;
 
-export const RecordIcon = styled.span`
+export const RecordIcon = styled.span<{ recording?: boolean }>`
   display: block;
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background-color: currentColor;
   flex-shrink: 0;
+  
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.5);
+      opacity: 0.5;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  ${({ recording }) =>
+    recording &&
+    `
+    animation: pulse 1.5s ease-in-out infinite;
+  `}
 `;
 
 export const RecordTime = styled.div`
@@ -79,6 +100,10 @@ export const RecordTime = styled.div`
   animation: fadeInUp 0.3s forwards;
 
   @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
     to {
       opacity: 1;
       transform: translateY(0);
@@ -102,6 +127,36 @@ export const ShowRecordingsButton = styled.button`
   transition: ${({ theme }) => theme.transitions.default};
   background: ${({ theme }) => theme.colors.background};
   color: ${({ theme }) => theme.colors.primary};
+  
+  &.exit {
+    animation: fadeOutDown 0.3s forwards;
+  }
+
+  &.enter {
+    animation: fadeInUp 0.3s forwards;
+  }
+
+  @keyframes fadeOutDown {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 `;
 
 export const RecordingsCount = styled.span`
