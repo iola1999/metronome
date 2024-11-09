@@ -95,9 +95,13 @@ export const TempoDisplay = styled.div`
 export const TempoNumber = styled.span`
   font-size: 3rem;
   font-weight: 600;
+  font-family: "JetBrains Mono", Consolas, Monaco, "Courier New", monospace;
   color: ${({ theme }) => theme.colors.primary};
   line-height: 1;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 3.6ch;
+  display: inline-block;
+  text-align: right;
 
   &.changing {
     animation: tempoChange 0.3s cubic-bezier(0.4, 0, 0.2, 1);
