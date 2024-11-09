@@ -4,7 +4,6 @@ import { Metronome } from "./components/Metronome";
 import { RecordingManager } from "./components/RecordingManager";
 import { Settings } from "./components/Settings";
 import { SettingsButton } from "./components/SettingsButton";
-import { UpdatePrompt } from "./components/UpdatePrompt";
 import { GlobalStyles } from "./styles/GlobalStyles";
 import { StyledContainer } from "./styles/components";
 import { theme } from "./styles/theme";
@@ -53,7 +52,6 @@ export const App = () => {
       <Suspense fallback={null}>
         <MessageContainer />
       </Suspense>
-      <UpdatePrompt />
     </ThemeProvider>
   );
 };

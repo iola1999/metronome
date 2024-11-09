@@ -38,13 +38,7 @@ export default defineConfig({
       VitePWA({
         registerType: "autoUpdate",
         injectRegister: "auto",
-        strategies: "generateSW",
-        workbox: {
-          globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,jpg,jpeg,json}"],
-          cleanupOutdatedCaches: true,
-          sourcemap: true,
-          importScripts: [],
-        },
+        strategies: "injectManifest",
         manifest: {
           name: "节拍器 - 支持录音的在线节拍器",
           short_name: "节拍器",
