@@ -5,6 +5,13 @@ import { useState, useEffect, useRef } from "react";
 import { message } from "./Message";
 import { eventBus } from "../util/events";
 import { RecordingsDB } from "../util/db";
+import {
+  FaGithub,
+  FaTrash,
+  FaExclamationTriangle,
+  FaRedo,
+  FaBroom,
+} from "react-icons/fa";
 
 const SettingSection = styled.div`
   padding: ${({ theme }) => theme.spacing.md};
@@ -99,14 +106,6 @@ const Select = styled.select`
     border-color: ${({ theme }) => theme.colors.accent};
     box-shadow: 0 0 0 2px ${({ theme }) => `${theme.colors.accent}33`};
   }
-`;
-
-const ActionSection = styled.div`
-  padding: ${({ theme }) => theme.spacing.md};
-  border-top: 1px solid ${({ theme }) => `${theme.colors.primary}1a`};
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.sm};
 `;
 
 const ActionButton = styled.button<{ variant?: "primary" | "danger" }>`
@@ -223,6 +222,16 @@ const AboutText = styled.div`
   padding: 8px 0;
   font-size: 0.9rem;
   color: ${({ theme }) => `${theme.colors.primary}cc`};
+`;
+
+// 添加一个新的带动画效果的容器组件
+const AnimatedSettingRow = styled(SettingRow)<{ visible: boolean }>`
+  max-height: ${({ visible }) => (visible ? "50px" : "0")};
+  opacity: ${({ visible }) => (visible ? "1" : "0")};
+  margin-bottom: ${({ visible, theme }) => (visible ? theme.spacing.sm : "0")};
+  transition: all 0.3s ease-in-out;
+  overflow: hidden;
+  pointer-events: ${({ visible }) => (visible ? "auto" : "none")};
 `;
 
 interface SettingsProps {
@@ -371,21 +380,19 @@ export const Settings = ({ isOpen, onClose }: SettingsProps) => {
               <span />
             </Switch>
           </SettingRow>
-          {metronome.accentFirst && (
-            <SettingRow>
-              <label>重音音量</label>
-              <Slider
-                type="range"
-                min="0"
-                max="1"
-                step="0.1"
-                value={metronome.accentVolume}
-                onChange={(e) =>
-                  setMetronomeSettings({ accentVolume: Number(e.target.value) })
-                }
-              />
-            </SettingRow>
-          )}
+          <AnimatedSettingRow visible={metronome.accentFirst}>
+            <label>重音音量</label>
+            <Slider
+              type="range"
+              min="0"
+              max="1"
+              step="0.1"
+              value={metronome.accentVolume}
+              onChange={(e) =>
+                setMetronomeSettings({ accentVolume: Number(e.target.value) })
+              }
+            />
+          </AnimatedSettingRow>
         </SettingSection>
 
         <SettingSection>
@@ -403,7 +410,10 @@ export const Settings = ({ isOpen, onClose }: SettingsProps) => {
                   清除中...
                 </>
               ) : (
-                "清除"
+                <>
+                  <FaBroom />
+                  清除
+                </>
               )}
             </ActionButton>
           </SettingRow>
@@ -414,7 +424,17 @@ export const Settings = ({ isOpen, onClose }: SettingsProps) => {
               className={showResetConfirm ? "confirming" : ""}
               style={{ width: "120px" }}
             >
-              {showResetConfirm ? "确认重置" : "重置"}
+              {showResetConfirm ? (
+                <>
+                  <FaExclamationTriangle />
+                  确认重置
+                </>
+              ) : (
+                <>
+                  <FaRedo />
+                  重置
+                </>
+              )}
             </ActionButton>
           </SettingRow>
           <SettingRow>
@@ -425,7 +445,17 @@ export const Settings = ({ isOpen, onClose }: SettingsProps) => {
               className={showClearDataConfirm ? "confirming" : ""}
               style={{ width: "120px" }}
             >
-              {showClearDataConfirm ? "确认删除" : "删除"}
+              {showClearDataConfirm ? (
+                <>
+                  <FaExclamationTriangle />
+                  确认删除
+                </>
+              ) : (
+                <>
+                  <FaTrash />
+                  删除
+                </>
+              )}
             </ActionButton>
           </SettingRow>
         </SettingSection>
@@ -444,6 +474,7 @@ export const Settings = ({ isOpen, onClose }: SettingsProps) => {
               }
               style={{ width: "120px" }}
             >
+              <FaGithub />
               访问仓库
             </ActionButton>
           </SettingRow>
