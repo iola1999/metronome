@@ -9,9 +9,43 @@ import { RecordingsDB } from "../util/db";
 const SettingSection = styled.div`
   padding: ${({ theme }) => theme.spacing.md};
 
+  &:not(:first-of-type) {
+    border-top: 1px solid ${({ theme }) => `${theme.colors.primary}1a`};
+  }
+
   h3 {
     margin-bottom: ${({ theme }) => theme.spacing.sm};
     color: ${({ theme }) => theme.colors.primary};
+    position: sticky;
+    top: 0;
+    background: ${({ theme }) => theme.colors.background};
+    padding: ${({ theme }) => theme.spacing.xs} 0;
+    z-index: 1;
+  }
+`;
+
+const SettingsContent = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  max-height: 70vh; // 设置最大高度
+  
+  // 自定义滚动条样式
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: ${({ theme }) => `${theme.colors.primary}0a`};
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: ${({ theme }) => `${theme.colors.primary}33`};
+    border-radius: 4px;
+    
+    &:hover {
+      background: ${({ theme }) => `${theme.colors.primary}66`};
+    }
   }
 `;
 
@@ -260,63 +294,77 @@ export const Settings = ({ isOpen, onClose }: SettingsProps) => {
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="设置">
-      <SettingSection>
-        <h3>节拍器</h3>
-        <SettingRow>
-          <label>音效</label>
-          <Select
-            value={metronome.soundType}
-            onChange={(e) =>
-              setMetronomeSettings({ soundType: e.target.value as any })
-            }
-          >
-            <option value="beep">电子音</option>
-            <option value="click">点击音</option>
-            <option value="wood">木鱼音</option>
-          </Select>
-        </SettingRow>
-        <SettingRow>
-          <label>总音量</label>
-          <Slider
-            type="range"
-            min="0"
-            max="1"
-            step="0.1"
-            value={metronome.volume}
-            onChange={(e) =>
-              setMetronomeSettings({ volume: Number(e.target.value) })
-            }
-          />
-        </SettingRow>
-        <SettingRow>
-          <label>首拍重音</label>
-          <Switch>
-            <input
-              type="checkbox"
-              checked={metronome.accentFirst}
-              onChange={(e) =>
-                setMetronomeSettings({ accentFirst: e.target.checked })
-              }
-            />
-            <span />
-          </Switch>
-        </SettingRow>
-        {metronome.accentFirst && (
+      <SettingsContent>
+        <SettingSection>
+          <h3>节拍器</h3>
           <SettingRow>
-            <label>重音音量</label>
+            <label>拍号</label>
+            <Select
+              value={metronome.timeSignature}
+              onChange={(e) =>
+                setMetronomeSettings({ timeSignature: e.target.value as "3/4" | "4/4" })
+              }
+            >
+              <option value="4/4">4/4</option>
+              <option value="3/4">3/4</option>
+            </Select>
+          </SettingRow>
+          <SettingRow>
+            <label>音效</label>
+            <Select
+              value={metronome.soundType}
+              onChange={(e) =>
+                setMetronomeSettings({ soundType: e.target.value as any })
+              }
+            >
+              <option value="beep">电子音</option>
+              <option value="click">点击音</option>
+              <option value="wood">木鱼音</option>
+            </Select>
+          </SettingRow>
+          <SettingRow>
+            <label>总音量</label>
             <Slider
               type="range"
               min="0"
               max="1"
               step="0.1"
-              value={metronome.accentVolume}
+              value={metronome.volume}
               onChange={(e) =>
-                setMetronomeSettings({ accentVolume: Number(e.target.value) })
+                setMetronomeSettings({ volume: Number(e.target.value) })
               }
             />
           </SettingRow>
-        )}
-      </SettingSection>
+          <SettingRow>
+            <label>首拍重音</label>
+            <Switch>
+              <input
+                type="checkbox"
+                checked={metronome.accentFirst}
+                onChange={(e) =>
+                  setMetronomeSettings({ accentFirst: e.target.checked })
+                }
+              />
+              <span />
+            </Switch>
+          </SettingRow>
+          {metronome.accentFirst && (
+            <SettingRow>
+              <label>重音音量</label>
+              <Slider
+                type="range"
+                min="0"
+                max="1"
+                step="0.1"
+                value={metronome.accentVolume}
+                onChange={(e) =>
+                  setMetronomeSettings({ accentVolume: Number(e.target.value) })
+                }
+              />
+            </SettingRow>
+          )}
+        </SettingSection>
+      </SettingsContent>
 
       <ActionSection>
         <ActionButton onClick={clearCache} disabled={isClearing}>

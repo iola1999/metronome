@@ -6,6 +6,7 @@ interface MetronomeSettings {
   soundType: "beep" | "click" | "wood";
   accentVolume: number;
   accentFirst: boolean;
+  timeSignature: "3/4" | "4/4";
 }
 
 const DEFAULT_SETTINGS = {
@@ -13,6 +14,7 @@ const DEFAULT_SETTINGS = {
   soundType: "click" as const,
   accentVolume: 0.6,
   accentFirst: true,
+  timeSignature: "4/4" as const,
 };
 
 interface SettingsState {

@@ -59,6 +59,9 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
   const [isPendulumActive, setIsPendulumActive] = useState(false);
   const timeoutIdsRef = useRef<number[]>([]);
 
+  const { timeSignature } = useSettingsStore((state) => state.metronome);
+  const beatsPerBar = timeSignature === "3/4" ? 3 : 4;
+
   useEffect(() => {
     const savedTempo =
       typeof window !== "undefined" ? localStorage.getItem("lastTempo") : null;
@@ -162,37 +165,36 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
 
   const startTicking = useCallback(() => {
     const currentTempo = tempo ?? METRONOME_CONFIG.BPM.DEFAULT;
-    const interval = (60 / currentTempo) * 2000;
+    const interval = (60 / currentTempo) * 1000;
 
     const tick = () => {
       if (!isPlaying) return;
 
-      const quarterPeriod = interval / 4;
-
       // 第一拍
       const firstBeatTimeout = setTimeout(() => {
-        beatCountRef.current = (beatCountRef.current + 1) % 4;
+        beatCountRef.current = (beatCountRef.current + 1) % beatsPerBar;
         playClick(beatCountRef.current);
-      }, quarterPeriod) as unknown as number;
+      }, 0) as unknown as number;
 
-      // 第二拍
-      const secondBeatTimeout = setTimeout(() => {
-        beatCountRef.current = (beatCountRef.current + 1) % 4;
-        playClick(beatCountRef.current);
-      }, quarterPeriod * 3) as unknown as number;
+      // 剩余的拍子
+      for (let i = 1; i < beatsPerBar; i++) {
+        const nextBeatTimeout = setTimeout(() => {
+          beatCountRef.current = (beatCountRef.current + 1) % beatsPerBar;
+          playClick(beatCountRef.current);
+        }, interval * i) as unknown as number;
+        timeoutIdsRef.current.push(nextBeatTimeout);
+      }
 
-      // 存储定时器ID
-      timeoutIdsRef.current.push(firstBeatTimeout, secondBeatTimeout);
+      timeoutIdsRef.current.push(firstBeatTimeout);
 
-      // 下一个周期
-      tickTimeoutRef.current = window.setTimeout(tick, interval);
+      // 下一个小节
+      tickTimeoutRef.current = window.setTimeout(tick, interval * beatsPerBar);
     };
 
-    // 开始新的周期前先清理
     clearAllTimeouts();
     setIsPendulumActive(true);
     tick();
-  }, [tempo, isPlaying, playClick, clearAllTimeouts]);
+  }, [tempo, isPlaying, playClick, clearAllTimeouts, beatsPerBar]);
 
   useEffect(() => {
     if (isPlaying && !isDragging) {
@@ -288,7 +290,7 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
       </TempoDisplay>
 
       <BeatIndicator>
-        {[0, 1, 2, 3].map((beat) => (
+        {Array.from({ length: beatsPerBar }).map((_, beat) => (
           <Beat
             key={beat}
             active={currentBeat === beat}
