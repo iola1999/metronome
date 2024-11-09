@@ -39,6 +39,7 @@
 ## ✨ 特点
 
 - 代码由 Cursor AI 生成
+- SSG 静态站点生成
 - PWA 支持，可安装到设备
 - IndexedDB 本地存储
 - 响应式设计
@@ -76,7 +77,9 @@
 
 ## 🛠 技术栈
 
+- Astro - SSG 静态站点生成
 - React + TypeScript
+- Emotion - CSS-in-JS
 - Vite - 构建工具
 - IndexedDB - 本地存储
 - Web Audio API - 音频处理
