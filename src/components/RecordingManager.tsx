@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { RecordingsDB, Recording } from "../util/db";
+import { RecordingsDB } from "../util/db";
+import type { Recording } from "../util/db";
 import { RecordingList } from "./RecordingList";
 import {
   RecordingControlsContainer,
@@ -27,7 +28,8 @@ export const RecordingManager = ({
   const [playingId, setPlayingId] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playProgress, setPlayProgress] = useState(0);
-  const [recordingInterval, setRecordingInterval] = useState<NodeJS.Timeout | null>(null);
+  const [recordingInterval, setRecordingInterval] =
+    useState<NodeJS.Timeout | null>(null);
   const [isExiting, setIsExiting] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -176,7 +178,7 @@ export const RecordingManager = ({
 
       // 更频繁地收集数据
       mediaRecorderRef.current.start(100);
-      
+
       // 在实际开始录音后再设置状态
       setIsRecording(true);
       setIsExiting(true);
@@ -196,10 +198,12 @@ export const RecordingManager = ({
         const minutes = Math.floor(elapsed / 60000);
         const seconds = Math.floor((elapsed % 60000) / 1000);
         setRecordingTime(
-          `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+          `${minutes.toString().padStart(2, "0")}:${seconds
+            .toString()
+            .padStart(2, "0")}`
         );
       }, 1000);
-      
+
       setRecordingInterval(interval);
     } catch (err) {
       console.error("录音失败:", err);
@@ -350,9 +354,9 @@ export const RecordingManager = ({
         {isRecording ? (
           <RecordTime>{recordingTime}</RecordTime>
         ) : (
-          <ShowRecordingsButton 
+          <ShowRecordingsButton
             onClick={() => setShowModal(true)}
-            className={isExiting ? 'exit' : 'enter'}
+            className={isExiting ? "exit" : "enter"}
           >
             历史
             {recordings.length > 0 && (

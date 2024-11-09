@@ -1,8 +1,4 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { App } from "./App";
-
-// 注册 Service Worker
+// 只保留 Service Worker 注册逻辑
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker
@@ -13,9 +9,3 @@ if ("serviceWorker" in navigator) {
       .catch((error) => console.log("ServiceWorker 注册失败:", error));
   });
 }
-
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);

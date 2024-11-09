@@ -1,7 +1,10 @@
-import { Recording } from "../util/db";
+import type { Recording } from "../util/db";
 import { RecordingItem } from "./RecordingItem";
 import { Modal } from "./Modal";
-import { RecordingsList, NoRecordings } from "../styles/components/RecordingStyles";
+import {
+  RecordingsList,
+  NoRecordings,
+} from "../styles/components/RecordingStyles";
 
 interface RecordingListProps {
   recordings: Recording[];

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Recording } from "../util/db";
+import type { Recording } from "../util/db";
 import {
   RecordingItemContainer,
   RecordingItemContent,
@@ -196,11 +196,7 @@ export const RecordingItem = ({
                 </svg>
               )}
             </IconButton>
-            <IconButton
-              variant="success"
-              onClick={handleShare}
-              title="分享"
-            >
+            <IconButton variant="success" onClick={handleShare} title="分享">
               <svg
                 width="24"
                 height="24"

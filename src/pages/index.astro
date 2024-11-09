@@ -1,0 +1,35 @@
+---
+import { App } from '../App';
+---
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>节拍器 - 支持录音的在线节拍器</title>
+    
+    <!-- PWA 相关 -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="节拍器" />
+    
+    <!-- 其他 meta 标签保持不变 -->
+    
+    <!-- favicon -->
+    <link rel="icon" href="/icons/icon.png" />
+    
+    <!-- iOS 图标 -->
+    <link rel="apple-touch-icon" href="/icons/icon.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon.png" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon.png" />
+    
+    <!-- 启动画面 -->
+    <link rel="apple-touch-startup-image" href="/icons/splash.png" />
+  </head>
+  <body>
+    <div id="root">
+      <App client:load />
+    </div>
+  </body>
+</html> 

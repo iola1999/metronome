@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import {
   Controls,
   PendulumContainer,
@@ -30,9 +30,7 @@ interface MetronomeProps {
 }
 
 export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
-  const [tempo, setTempo] = useState(() =>
-    parseInt(localStorage.getItem("lastTempo") || "120")
-  );
+  const [tempo, setTempo] = useState<number>(120);
   const [currentBeat, setCurrentBeat] = useState(-1);
   const audioContextRef = useRef<AudioContext | null>(null);
   const tickTimeoutRef = useRef<number | null>(null);
@@ -41,12 +39,21 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
   const [isTempoChanging, setIsTempoChanging] = useState(false);
 
   useEffect(() => {
+    const savedTempo =
+      typeof window !== "undefined" ? localStorage.getItem("lastTempo") : null;
+    if (savedTempo) {
+      setTempo(parseInt(savedTempo));
+    }
+  }, []);
+
+  useEffect(() => {
     localStorage.setItem("lastTempo", tempo.toString());
   }, [tempo]);
 
   const playClick = useCallback(async (beatNumber: number) => {
-    const { volume, accentVolume, soundType } = useSettingsStore.getState().metronome;
-    
+    const { volume, accentVolume, soundType } =
+      useSettingsStore.getState().metronome;
+
     if (!audioContextRef.current) {
       audioContextRef.current = new (window.AudioContext ||
         window.webkitAudioContext)();
@@ -64,11 +71,11 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
 
     const getSoundFrequency = (isAccent: boolean) => {
       switch (soundType) {
-        case 'beep':
+        case "beep":
           return isAccent ? 1800 : 1200; // 电子音 - 高频
-        case 'wood':
-          return isAccent ? 180 : 120;   // 木鱼音 - 低频
-        case 'click':
+        case "wood":
+          return isAccent ? 180 : 120; // 木鱼音 - 低频
+        case "click":
         default:
           return isAccent ? 1500 : 1000; // 点击音 - 中频
       }
@@ -76,23 +83,23 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
 
     const now = audioContextRef.current.currentTime;
     const isAccent = beatNumber === 0;
-    
+
     oscillator.frequency.value = getSoundFrequency(isAccent);
     gainNode.gain.value = isAccent ? accentVolume : volume;
 
     switch (soundType) {
-      case 'beep':
+      case "beep":
         oscillator.start(now);
         gainNode.gain.setValueAtTime(gainNode.gain.value, now);
         gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
         oscillator.stop(now + 0.15);
         break;
-        
-      case 'wood':
+
+      case "wood":
         const lowOscillator = audioContextRef.current.createOscillator();
         lowOscillator.connect(gainNode);
         lowOscillator.frequency.value = getSoundFrequency(isAccent) * 0.5;
-        
+
         oscillator.start(now);
         lowOscillator.start(now);
         gainNode.gain.setValueAtTime(gainNode.gain.value, now);
@@ -100,8 +107,8 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
         oscillator.stop(now + 0.08);
         lowOscillator.stop(now + 0.08);
         break;
-        
-      case 'click':
+
+      case "click":
       default:
         oscillator.start(now);
         gainNode.gain.setValueAtTime(gainNode.gain.value, now);
@@ -154,16 +161,20 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
   const handleTempoChange = (newTempo: number) => {
     const clampedTempo = Math.min(Math.max(newTempo, 30), 240);
     setTempo(clampedTempo);
-    
+
     setIsTempoChanging(true);
     setTimeout(() => setIsTempoChanging(false), 300);
+  };
+
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleTempoChange(parseInt(e.target.value));
   };
 
   return (
     <Controls>
       <PendulumContainer>
-        <Pendulum 
-          className={isPlaying ? "active" : ""} 
+        <Pendulum
+          className={isPlaying ? "active" : ""}
           style={{ "--tempo": tempo } as React.CSSProperties}
         >
           <PendulumArm />
@@ -172,7 +183,7 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
       </PendulumContainer>
 
       <TempoDisplay>
-        <TempoNumber className={isTempoChanging ? 'changing' : ''}>
+        <TempoNumber className={isTempoChanging ? "changing" : ""}>
           {tempo}
         </TempoNumber>
         <BpmText>BPM</BpmText>
@@ -210,7 +221,7 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
             }
           }}
           onTouchEnd={() => setIsDragging(false)}
-          onChange={(e) => handleTempoChange(parseInt(e.target.value))}
+          onChange={handleSliderChange}
         />
         <TempoPresets>
           {[60, 90, 120, 160].map((presetTempo) => (
