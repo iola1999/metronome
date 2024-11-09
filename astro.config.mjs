@@ -42,7 +42,7 @@ export default defineConfig({
           globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,jpg,jpeg,json}"],
           cleanupOutdatedCaches: true,
           sourcemap: true,
-          importScripts: ["sw-custom.js"],
+          importScripts: [],
         },
         manifest: {
           name: "节拍器 - 支持录音的在线节拍器",
