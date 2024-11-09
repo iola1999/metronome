@@ -27,6 +27,7 @@ export const RecordingManager = ({
   const [playingId, setPlayingId] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playProgress, setPlayProgress] = useState(0);
+  const [recordingInterval, setRecordingInterval] = useState<NodeJS.Timeout | null>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
@@ -185,7 +186,17 @@ export const RecordingManager = ({
         };
       });
 
-      updateRecordingTime();
+      const startTime = Date.now();
+      const interval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const minutes = Math.floor(elapsed / 60000);
+        const seconds = Math.floor((elapsed % 60000) / 1000);
+        setRecordingTime(
+          `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+        );
+      }, 1000);
+      
+      setRecordingInterval(interval);
     } catch (err) {
       console.error("录音失败:", err);
       alert("无法访问麦克风，请确保已授予权限。");
@@ -236,6 +247,11 @@ export const RecordingManager = ({
       await dbRef.current.saveRecording(recording);
       await loadRecordings();
       setRecordingTime("00:00");
+
+      if (recordingInterval) {
+        clearInterval(recordingInterval);
+        setRecordingInterval(null);
+      }
     } catch (err) {
       console.error("停止录音失败:", err);
       alert("录音保存失败，请重试");
@@ -313,16 +329,18 @@ export const RecordingManager = ({
           {isRecording ? "结束" : "开始"}
         </RecordButton>
 
-        {(isRecording || recordingTime !== "00:00") && (
+        {!isRecording && (
+          <ShowRecordingsButton onClick={() => setShowModal(true)}>
+            历史
+            {recordings.length > 0 && (
+              <RecordingsCount>{recordings.length}</RecordingsCount>
+            )}
+          </ShowRecordingsButton>
+        )}
+        
+        {isRecording && (
           <RecordTime>{recordingTime}</RecordTime>
         )}
-
-        <ShowRecordingsButton onClick={() => setShowModal(true)}>
-          历史
-          {recordings.length > 0 && (
-            <RecordingsCount>{recordings.length}</RecordingsCount>
-          )}
-        </ShowRecordingsButton>
       </RecordingMainControls>
 
       <RecordingList

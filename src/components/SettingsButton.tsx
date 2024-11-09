@@ -4,7 +4,11 @@ export const SettingsButton = ({ onClick }: { onClick: () => void }) => (
   <IconButton
     variant="primary"
     onClick={onClick}
-    style={{ position: 'absolute', top: 20, right: 20 }}
+    style={{
+      position: 'absolute',
+      top: 'max(env(safe-area-inset-top, 20px), 20px)',
+      right: 'max(env(safe-area-inset-right, 20px), 20px)'
+    }}
     title="设置"
   >
     <svg
