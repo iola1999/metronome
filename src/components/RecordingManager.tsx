@@ -30,7 +30,6 @@ export const RecordingManager = ({
   const [playProgress, setPlayProgress] = useState(0);
   const [recordingInterval, setRecordingInterval] =
     useState<NodeJS.Timeout | null>(null);
-  const [isExiting, setIsExiting] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
@@ -181,7 +180,6 @@ export const RecordingManager = ({
 
       // 在实际开始录音后再设置状态
       setIsRecording(true);
-      setIsExiting(true);
       startTimeRef.current = Date.now();
 
       // 停止所有之前的音轨
@@ -210,7 +208,6 @@ export const RecordingManager = ({
       alert("无法访问麦克风，请确保已授予权限。");
       // 确保在出错时重置所有状态
       setIsRecording(false);
-      setIsExiting(false);
     }
   };
 
@@ -319,7 +316,6 @@ export const RecordingManager = ({
   const handleStopRecording = () => {
     stopRecording();
     // 不需要额外的 setTimeout，让状态更新更连贯
-    setIsExiting(false);
   };
 
   return (
@@ -341,7 +337,6 @@ export const RecordingManager = ({
         ) : (
           <ShowRecordingsButton
             onClick={() => setShowModal(true)}
-            className={isExiting ? "exit" : "enter"}
           >
             历史
             {recordings.length > 0 && (

@@ -30,24 +30,26 @@ interface MetronomeProps {
 }
 
 export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
-  const [tempo, setTempo] = useState<number>(120);
+  const [tempo, setTempo] = useState<number | null>(null);
   const [currentBeat, setCurrentBeat] = useState(-1);
   const audioContextRef = useRef<AudioContext | null>(null);
   const tickTimeoutRef = useRef<number | null>(null);
   const beatCountRef = useRef(-1);
   const [isDragging, setIsDragging] = useState(false);
   const [isTempoChanging, setIsTempoChanging] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     const savedTempo =
       typeof window !== "undefined" ? localStorage.getItem("lastTempo") : null;
-    if (savedTempo) {
-      setTempo(parseInt(savedTempo));
-    }
+    setTempo(savedTempo ? parseInt(savedTempo) : 120);
+    setIsLoaded(true);
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("lastTempo", tempo.toString());
+    if (tempo !== null) {
+      localStorage.setItem("lastTempo", tempo.toString());
+    }
   }, [tempo]);
 
   const playClick = useCallback(async (beatNumber: number) => {
@@ -121,7 +123,8 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
   }, []);
 
   const startTicking = useCallback(() => {
-    const interval = (60 / tempo) * 1000;
+    const currentTempo = tempo ?? 120;
+    const interval = (60 / currentTempo) * 1000;
 
     const tick = async () => {
       if (!isPlaying) return;
@@ -171,7 +174,7 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
   };
 
   return (
-    <Controls>
+    <Controls style={{ visibility: isLoaded ? 'visible' : 'hidden' }}>
       <PendulumContainer>
         <Pendulum
           className={isPlaying ? "active" : ""}
@@ -184,7 +187,7 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
 
       <TempoDisplay>
         <TempoNumber className={isTempoChanging ? "changing" : ""}>
-          {tempo}
+          {tempo ?? ""}
         </TempoNumber>
         <BpmText>BPM</BpmText>
       </TempoDisplay>
@@ -204,7 +207,7 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
           type="range"
           min="30"
           max="240"
-          value={tempo}
+          value={tempo ?? 120}
           onMouseDown={() => {
             setIsDragging(true);
             if (isPlaying && tickTimeoutRef.current) {
