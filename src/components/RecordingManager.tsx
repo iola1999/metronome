@@ -269,21 +269,6 @@ export const RecordingManager = ({
     }
   };
 
-  const updateRecordingTime = () => {
-    timerRef.current = window.setInterval(() => {
-      if (!startTimeRef.current) return;
-
-      const duration = Date.now() - startTimeRef.current;
-      const minutes = Math.floor(duration / 60000);
-      const seconds = Math.floor((duration % 60000) / 1000);
-      setRecordingTime(
-        `${minutes.toString().padStart(2, "0")}:${seconds
-          .toString()
-          .padStart(2, "0")}`
-      );
-    }, 1000);
-  };
-
   // 组件卸载时清理资源
   useEffect(() => {
     return () => {
