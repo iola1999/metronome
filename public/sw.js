@@ -11,13 +11,19 @@ async function checkForUpdates() {
     const freshResponse = await fetch("/", { cache: "no-cache" });
     if (!freshResponse.ok) return false;
 
-    // 如果检测到更新，直接更新缓存
-    await currentCache.put("/", freshResponse.clone());
-
     const cachedText = await cachedResponse.text();
     const freshText = await freshResponse.text();
 
-    return cachedText !== freshText;
+    if (cachedText !== freshText) {
+      // 检测到更新时，清除所有缓存
+      await caches.delete(CACHE_NAME);
+      // 创建新的缓存并缓存根路径
+      const newCache = await caches.open(CACHE_NAME);
+      await newCache.put("/", freshResponse);
+      return true;
+    }
+
+    return false;
   } catch (error) {
     console.error("检查更新失败:", error);
     return false;
@@ -28,24 +34,27 @@ async function checkForUpdates() {
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      // 缓存根路径
       return cache.add("/");
     })
   );
+  self.skipWaiting();
 });
 
 // 激活 Service Worker
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    Promise.all([
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== CACHE_NAME) {
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      }),
+      self.clients.claim(),
+    ])
   );
 });
 
