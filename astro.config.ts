@@ -1,13 +1,14 @@
 import { defineConfig } from "astro/config";
+import type { AstroConfig } from "astro";
 import react from "@astrojs/react";
 import { VitePWA } from "vite-plugin-pwa";
+import type { VitePWAOptions } from "vite-plugin-pwa";
 import basicSsl from "@vitejs/plugin-basic-ssl";
 
 export default defineConfig({
   integrations: [
     react({
       include: ["**/*.tsx"],
-      jsxImportSource: "@emotion/react",
     }),
   ],
   vite: {
