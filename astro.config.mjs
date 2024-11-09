@@ -79,66 +79,12 @@ export default defineConfig({
           related_applications: [],
           prefer_related_applications: false,
         },
-        workbox: {
-          cleanupOutdatedCaches: true,
-          runtimeCaching: [
-            {
-              urlPattern: /\.html$/,
-              handler: "NetworkFirst",
-              options: {
-                cacheName: "html-cache",
-                expiration: {
-                  maxEntries: 10,
-                  maxAgeSeconds: 60 * 60 * 24, // 1 天
-                },
-                networkTimeoutSeconds: 10,
-              },
-            },
-            {
-              urlPattern: /\.(js|css)$/,
-              handler: "StaleWhileRevalidate",
-              options: {
-                cacheName: "assets-cache",
-                expiration: {
-                  maxEntries: 50,
-                  maxAgeSeconds: 60 * 60 * 24 * 7, // 7 天
-                },
-              },
-            },
-            {
-              urlPattern: /\.(png|jpg|jpeg|svg|gif|ico|wav)$/,
-              handler: "CacheFirst",
-              options: {
-                cacheName: "static-cache",
-                expiration: {
-                  maxEntries: 60,
-                  maxAgeSeconds: 60 * 60 * 24 * 30, // 30 天
-                },
-              },
-            },
-            {
-              urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-              handler: "CacheFirst",
-              options: {
-                cacheName: "google-fonts-cache",
-                expiration: {
-                  maxEntries: 10,
-                  maxAgeSeconds: 60 * 60 * 24 * 365, // 1 年
-                },
-                cacheableResponse: {
-                  statuses: [0, 200],
-                },
-              },
-            },
-          ],
-          skipWaiting: true,
-          clientsClaim: true,
-          globIgnores: ["**/node_modules/**/*", "**/.git/**/*", "**/sw.js"],
-        },
+        injectRegister: null,
+        strategies: "injectManifest",
+        srcDir: "public",
+        filename: "sw.js",
         devOptions: {
           enabled: true,
-          type: "module",
-          navigateFallback: "index.html",
         },
       }),
     ],
