@@ -11,6 +11,8 @@ declare module "@emotion/react" {
       error: string;
       success: string;
       warning: string;
+      text: string;
+      border: string;
     };
     spacing: {
       xs: string;

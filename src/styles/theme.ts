@@ -7,6 +7,8 @@ export const theme = {
     error: "#ff3b30",
     success: "#34c759",
     warning: "#ff9500",
+    text: "#2d3436",
+    border: "#b2bec3",
   },
   spacing: {
     xs: "0.5rem",

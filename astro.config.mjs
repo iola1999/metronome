@@ -35,9 +35,15 @@ export default defineConfig({
     plugins: [
       basicSsl(),
       VitePWA({
-        registerType: null,
-        injectRegister: null,
-        strategies: "injectManifest",
+        registerType: "autoUpdate",
+        injectRegister: "auto",
+        strategies: "generateSW",
+        workbox: {
+          globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,jpg,jpeg,json}"],
+          cleanupOutdatedCaches: true,
+          sourcemap: true,
+          importScripts: ["sw-custom.js"],
+        },
         manifest: {
           name: "节拍器 - 支持录音的在线节拍器",
           short_name: "节拍器",
@@ -81,12 +87,10 @@ export default defineConfig({
           related_applications: [],
           prefer_related_applications: false,
         },
-        srcDir: "public",
-        filename: "sw.js",
         devOptions: {
-          enabled: false,
+          enabled: true,
+          type: "module",
         },
-        disable: true,
       }),
     ],
     server: {

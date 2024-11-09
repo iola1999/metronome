@@ -1,13 +1,13 @@
 import { ThemeProvider } from "@emotion/react";
-import { theme } from "./styles/theme";
-import { GlobalStyles } from "./styles/GlobalStyles";
-import { StyledContainer } from "./styles/components";
+import { lazy, Suspense, useState, useTransition } from "react";
 import { Metronome } from "./components/Metronome";
 import { RecordingManager } from "./components/RecordingManager";
-import { useState, lazy, Suspense, useTransition, useEffect } from "react";
-import { SettingsButton } from "./components/SettingsButton";
 import { Settings } from "./components/Settings";
-import { message } from "./components/Message";
+import { SettingsButton } from "./components/SettingsButton";
+import { UpdatePrompt } from "./components/UpdatePrompt";
+import { GlobalStyles } from "./styles/GlobalStyles";
+import { StyledContainer } from "./styles/components";
+import { theme } from "./styles/theme";
 
 // 懒加载 MessageContainer
 const MessageContainer = lazy(() => import("./components/MessageContainer"));
@@ -31,26 +31,6 @@ export const App = () => {
     });
   };
 
-  useEffect(() => {
-    // 检查是否支持 Service Worker
-    if ("serviceWorker" in navigator) {
-      // 注册更新检查的消息监听
-      navigator.serviceWorker.addEventListener("message", (event) => {
-        if (event.data.type === "UPDATE_AVAILABLE") {
-          message.info("应用已更新，下次启动时生效3");
-        }
-      });
-
-      // 页面加载时检查更新
-      const checkForUpdates = async () => {
-        const registration = await navigator.serviceWorker.ready;
-        registration.active?.postMessage("CHECK_UPDATES");
-      };
-
-      checkForUpdates();
-    }
-  }, []);
-
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyles theme={theme} />
@@ -73,6 +53,7 @@ export const App = () => {
       <Suspense fallback={null}>
         <MessageContainer />
       </Suspense>
+      <UpdatePrompt />
     </ThemeProvider>
   );
 };
