@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { useSettingsStore } from "../store/settings";
 import { Modal } from "./Modal";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { message } from "./Message";
 import { eventBus } from "../util/events";
 import { RecordingsDB } from "../util/db";
@@ -14,7 +14,8 @@ const SettingSection = styled.div`
   }
 
   h3 {
-    margin: -${({ theme }) => theme.spacing.md} -${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.md};
+    margin: ${({ theme }) =>
+      `-${theme.spacing.md} -${theme.spacing.md} ${theme.spacing.md}`};
     padding: ${({ theme }) => theme.spacing.md};
     color: ${({ theme }) => theme.colors.primary};
     font-size: 0.9rem;
@@ -35,7 +36,7 @@ const SettingsContent = styled.div`
   flex: 1;
   overflow-y: auto;
   max-height: 70vh; // 设置最大高度
-  
+
   // 自定义滚动条样式
   &::-webkit-scrollbar {
     width: 8px;
@@ -49,7 +50,7 @@ const SettingsContent = styled.div`
   &::-webkit-scrollbar-thumb {
     background: ${({ theme }) => `${theme.colors.primary}33`};
     border-radius: 4px;
-    
+
     &:hover {
       background: ${({ theme }) => `${theme.colors.primary}66`};
     }
@@ -218,6 +219,12 @@ const Switch = styled.label`
   }
 `;
 
+const AboutText = styled.div`
+  padding: 8px 0;
+  font-size: 0.9rem;
+  color: ${({ theme }) => `${theme.colors.primary}cc`};
+`;
+
 interface SettingsProps {
   isOpen: boolean;
   onClose: () => void;
@@ -228,6 +235,13 @@ export const Settings = ({ isOpen, onClose }: SettingsProps) => {
   const [isClearing, setIsClearing] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showClearDataConfirm, setShowClearDataConfirm] = useState(false);
+  const settingsContentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isOpen && settingsContentRef.current) {
+      settingsContentRef.current.scrollTop = 0;
+    }
+  }, [isOpen]);
 
   const clearCache = async () => {
     setIsClearing(true);
@@ -301,7 +315,7 @@ export const Settings = ({ isOpen, onClose }: SettingsProps) => {
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="设置">
-      <SettingsContent>
+      <SettingsContent ref={settingsContentRef}>
         <SettingSection>
           <h3>节拍器</h3>
           <SettingRow>
@@ -309,7 +323,9 @@ export const Settings = ({ isOpen, onClose }: SettingsProps) => {
             <Select
               value={metronome.timeSignature}
               onChange={(e) =>
-                setMetronomeSettings({ timeSignature: e.target.value as "3/4" | "4/4" })
+                setMetronomeSettings({
+                  timeSignature: e.target.value as "3/4" | "4/4",
+                })
               }
             >
               <option value="4/4">4/4</option>
@@ -376,10 +392,10 @@ export const Settings = ({ isOpen, onClose }: SettingsProps) => {
           <h3>系统</h3>
           <SettingRow>
             <label>清除缓存</label>
-            <ActionButton 
-              onClick={clearCache} 
+            <ActionButton
+              onClick={clearCache}
               disabled={isClearing}
-              style={{ width: '120px' }}
+              style={{ width: "120px" }}
             >
               {isClearing ? (
                 <>
@@ -396,7 +412,7 @@ export const Settings = ({ isOpen, onClose }: SettingsProps) => {
             <ActionButton
               onClick={handleResetSettings}
               className={showResetConfirm ? "confirming" : ""}
-              style={{ width: '120px' }}
+              style={{ width: "120px" }}
             >
               {showResetConfirm ? "确认重置" : "重置"}
             </ActionButton>
@@ -407,9 +423,28 @@ export const Settings = ({ isOpen, onClose }: SettingsProps) => {
               variant="danger"
               onClick={clearData}
               className={showClearDataConfirm ? "confirming" : ""}
-              style={{ width: '120px' }}
+              style={{ width: "120px" }}
             >
               {showClearDataConfirm ? "确认删除" : "删除"}
+            </ActionButton>
+          </SettingRow>
+        </SettingSection>
+
+        <SettingSection>
+          <h3>关于</h3>
+          <AboutText>
+            一个简单但功能完整的在线节拍器应用，支持 PWA
+            安装、录音等功能。完全由 AI 协助开发。
+          </AboutText>
+          <SettingRow>
+            <label>GitHub</label>
+            <ActionButton
+              onClick={() =>
+                window.open("https://github.com/iola1999/metronome", "_blank")
+              }
+              style={{ width: "120px" }}
+            >
+              访问仓库
             </ActionButton>
           </SettingRow>
         </SettingSection>
