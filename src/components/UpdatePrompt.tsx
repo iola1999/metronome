@@ -12,7 +12,7 @@ export function UpdatePrompt() {
   const [offlineReady, setOfflineReady] = useState(false);
 
   useEffect(() => {
-    const updateSW = registerSW({
+    registerSW({
       onNeedRefresh() {
         setNeedRefresh(true);
       },
@@ -20,8 +20,6 @@ export function UpdatePrompt() {
         setOfflineReady(true);
       },
     });
-
-    window.updateSW = updateSW;
   }, []);
 
   const close = () => {
