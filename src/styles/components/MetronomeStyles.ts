@@ -68,8 +68,10 @@ export const Pendulum = styled.div`
   display: flex;
   justify-content: center;
   transform-origin: bottom center;
+  transition: transform 0.3s ease-out;
 
   &.active {
+    transition: none;
     animation: swing calc(120s / var(--tempo)) infinite;
     animation-timing-function: cubic-bezier(0.4, 0.0, 0.6, 1.0);
   }

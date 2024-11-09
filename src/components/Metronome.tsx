@@ -56,6 +56,7 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isTempoChanging, setIsTempoChanging] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isPendulumActive, setIsPendulumActive] = useState(false);
 
   useEffect(() => {
     const savedTempo =
@@ -142,8 +143,18 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
   }, []);
 
   const startTicking = useCallback(() => {
+    // 清除现有的定时器
+    if (tickTimeoutRef.current) {
+      clearTimeout(tickTimeoutRef.current);
+      tickTimeoutRef.current = null;
+    }
+    
     const currentTempo = tempo ?? METRONOME_CONFIG.BPM.DEFAULT;
     const interval = (60 / currentTempo) * 2000;
+
+    // 重置节拍计数
+    beatCountRef.current = -1;
+    setCurrentBeat(-1);
 
     const tick = async () => {
       if (!isPlaying) return;
@@ -167,14 +178,15 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
       }, quarterPeriod * 3);
     };
 
-    beatCountRef.current = -1;
     tick();
   }, [tempo, isPlaying, playClick]);
 
   useEffect(() => {
     if (isPlaying && !isDragging) {
+      setIsPendulumActive(true);
       startTicking();
     } else {
+      setIsPendulumActive(false);
       if (tickTimeoutRef.current) {
         clearTimeout(tickTimeoutRef.current);
         tickTimeoutRef.current = null;
@@ -197,8 +209,26 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
       Math.max(newTempo, METRONOME_CONFIG.BPM.MIN),
       METRONOME_CONFIG.BPM.MAX
     );
+    
+    // 重置所有状态
+    if (tickTimeoutRef.current) {
+      clearTimeout(tickTimeoutRef.current);
+      tickTimeoutRef.current = null;
+    }
+    beatCountRef.current = -1;
+    setCurrentBeat(-1);
+    
+    // 更新tempo
     setTempo(clampedTempo);
     setIsTempoChanging(true);
+    
+    // 只有在非拖动状态下且正在播放时，才重新开始
+    if (isPlaying && !isDragging) {
+      setTimeout(() => {
+        startTicking();
+      }, 0);
+    }
+    
     setTimeout(() => setIsTempoChanging(false), 300);
   };
 
@@ -216,14 +246,34 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
     return Math.round(position);
   }, []);
 
+  const handleSliderMouseDown = () => {
+    setIsDragging(true);
+    setIsPendulumActive(false);
+    if (tickTimeoutRef.current) {
+      clearTimeout(tickTimeoutRef.current);
+      tickTimeoutRef.current = null;
+    }
+    beatCountRef.current = -1;
+    setCurrentBeat(-1);
+  };
+
+  const handleSliderMouseUp = () => {
+    setIsDragging(false);
+    if (isPlaying) {
+      setIsPendulumActive(true);
+      startTicking();
+    }
+  };
+
   return (
     <Controls style={{ visibility: isLoaded ? "visible" : "hidden" }}>
       <PendulumContainer>
         <Pendulum
-          className={isPlaying ? "active" : ""}
+          className={isPendulumActive ? "active" : ""}
           style={
             {
               "--tempo": tempo,
+              transform: !isPendulumActive ? "rotate(0deg)" : undefined,
             } as React.CSSProperties
           }
         >
@@ -259,22 +309,10 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
           min={METRONOME_CONFIG.BPM.MIN}
           max={METRONOME_CONFIG.BPM.MAX}
           value={tempo ?? METRONOME_CONFIG.BPM.DEFAULT}
-          onMouseDown={() => {
-            setIsDragging(true);
-            if (isPlaying && tickTimeoutRef.current) {
-              clearTimeout(tickTimeoutRef.current);
-              tickTimeoutRef.current = null;
-            }
-          }}
-          onMouseUp={() => setIsDragging(false)}
-          onTouchStart={() => {
-            setIsDragging(true);
-            if (isPlaying && tickTimeoutRef.current) {
-              clearTimeout(tickTimeoutRef.current);
-              tickTimeoutRef.current = null;
-            }
-          }}
-          onTouchEnd={() => setIsDragging(false)}
+          onMouseDown={handleSliderMouseDown}
+          onMouseUp={handleSliderMouseUp}
+          onTouchStart={handleSliderMouseDown}
+          onTouchEnd={handleSliderMouseUp}
           onChange={handleSliderChange}
         />
         <TempoPresets>
