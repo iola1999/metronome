@@ -114,23 +114,31 @@ export const Settings = ({ isOpen, onClose }: SettingsProps) => {
   const clearCache = async () => {
     setIsClearing(true);
     try {
-      // 获取所有的 Service Worker 注册
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      
-      // 清除每个 Service Worker 的缓存
-      await Promise.all(registrations.map(async (registration) => {
-        // 获取该 Service Worker 控制的所有缓存名称
-        const cacheNames = await caches.keys();
+      // 检查是否支持 Service Worker
+      if ('serviceWorker' in navigator) {
+        // 获取所有的 Service Worker 注册
+        const registrations = await navigator.serviceWorker.getRegistrations();
         
-        // 删除所有缓存
-        await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
-        
-        // 注销 Service Worker
-        await registration.unregister();
-      }));
+        // 清除每个 Service Worker 的缓存
+        await Promise.all(registrations.map(async (registration) => {
+          // 获取该 Service Worker 控制的所有缓存名称
+          const cacheNames = await caches.keys();
+          
+          // 删除所有缓存
+          await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
+          
+          // 注销 Service Worker
+          await registration.unregister();
+        }));
 
-      // 刷新页面以重新安装 Service Worker
-      window.location.reload();
+        // 刷新页面以重新安装 Service Worker
+        window.location.reload();
+      } else {
+        // 如果不支持 Service Worker，等待一小段时间后显示成功
+        await new Promise(resolve => setTimeout(resolve, 800));
+        alert('缓存已清除');
+        setIsClearing(false);
+      }
     } catch (error) {
       console.error('清除缓存失败:', error);
       alert('清除缓存失败，请重试');

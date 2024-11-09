@@ -13,6 +13,7 @@ import {
   RecordingLabel,
 } from "../styles/components/RecordingStyles";
 import { MdMic } from "react-icons/md";
+import { message } from "./Message";
 
 interface RecordingManagerProps {
   onPlaybackStart: () => void;
@@ -151,63 +152,136 @@ export const RecordingManager = ({
         return type;
       }
     }
-    console.warn("没有找到支持的录音格式，使用默认格式");
+    console.warn("没有找到支持的录音格，使用默认格式");
     return "";
   };
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-      // 创建 MediaRecorder 时使用支持的 MIME 类型
-      const options: MediaRecorderOptions = {};
-      const mimeType = getSupportedMimeType();
-      if (mimeType) {
-        options.mimeType = mimeType;
+      // 先检查是否支持 MediaDevices API
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        message.error('您的浏览器不支持录音功能');
+        return;
       }
 
-      mediaRecorderRef.current = new MediaRecorder(stream, options);
-      recordedChunksRef.current = [];
+      // 先尝试获取设备列表权限
+      let devices;
+      try {
+        devices = await navigator.mediaDevices.enumerateDevices();
+      } catch (err) {
+        console.error('获取设备列表失败:', err);
+        message.error('无法获取录音设备信息，请检查权限设置');
+        return;
+      }
 
+      // 检查是否有录音设备
+      const hasAudioInput = devices.some(device => device.kind === 'audioinput');
+      if (!hasAudioInput) {
+        console.error('未检测到录音设备');
+        message.error('未检测到录音设备');
+        return;
+      }
+
+      // 尝试获取录音权限
+      let stream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ 
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+          } 
+        });
+      } catch (err) {
+        console.error('获取录音权限失败:', err);
+        
+        if (err instanceof DOMException) {
+          switch (err.name) {
+            case 'NotAllowedError':
+              message.error('需要麦克风权限才能录音，请在浏览器设置中允许访问麦克风');
+              break;
+            case 'NotFoundError':
+              message.error('未检测到可用的录音设备');
+              break;
+            case 'NotReadableError':
+              message.error('录音设备被占用，请检查是否有其他应用正在使用麦克风');
+              break;
+            case 'OverconstrainedError':
+              message.error('录音设备不满足要求，请尝试使用其他设备');
+              break;
+            case 'SecurityError':
+              message.error('录音功能被系统安全策略限制');
+              break;
+            default:
+              message.error(`录音失败: ${err.message || '未知错误'}`);
+          }
+        } else {
+          message.error('录音初始化失败，请重试');
+        }
+        return;
+      }
+
+      // 创建 MediaRecorder
+      try {
+        const options: MediaRecorderOptions = {};
+        const mimeType = getSupportedMimeType();
+        if (mimeType) {
+          options.mimeType = mimeType;
+        }
+
+        mediaRecorderRef.current = new MediaRecorder(stream, options);
+      } catch (err) {
+        console.error('创建录音器失败:', err);
+        message.error('创建录音器失败，您的浏览器可能不支持此格式');
+        stream.getTracks().forEach(track => track.stop());
+        return;
+      }
+
+      // 设置录音数据处理
+      recordedChunksRef.current = [];
       mediaRecorderRef.current.ondataavailable = (e) => {
         if (e.data.size > 0) {
           recordedChunksRef.current.push(e.data);
         }
       };
 
-      // 更频繁地收集数据
-      mediaRecorderRef.current.start(100);
+      // 开始录音
+      try {
+        mediaRecorderRef.current.start(100);
+        setIsRecording(true);
+        startTimeRef.current = Date.now();
 
-      // 在实际开始录音后再设置状态
-      setIsRecording(true);
-      startTimeRef.current = Date.now();
+        // 设置音轨结束处理
+        stream.getAudioTracks().forEach((track) => {
+          track.onended = () => {
+            console.log("音轨结束");
+            stopRecording();
+          };
+        });
 
-      // 停止所有之前的音轨
-      stream.getAudioTracks().forEach((track) => {
-        track.onended = () => {
-          console.log("音轨结束");
-          stopRecording();
-        };
-      });
+        // 设置录音计时器
+        const startTime = Date.now();
+        const interval = setInterval(() => {
+          const elapsed = Date.now() - startTime;
+          const minutes = Math.floor(elapsed / 60000);
+          const seconds = Math.floor((elapsed % 60000) / 1000);
+          setRecordingTime(
+            `${minutes.toString().padStart(2, "0")}:${seconds
+              .toString()
+              .padStart(2, "0")}`
+          );
+        }, 1000);
 
-      const startTime = Date.now();
-      const interval = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const minutes = Math.floor(elapsed / 60000);
-        const seconds = Math.floor((elapsed % 60000) / 1000);
-        setRecordingTime(
-          `${minutes.toString().padStart(2, "0")}:${seconds
-            .toString()
-            .padStart(2, "0")}`
-        );
-      }, 1000);
-
-      setRecordingInterval(interval);
+        setRecordingInterval(interval);
+      } catch (err) {
+        console.error('开始录音失败:', err);
+        message.error('开始录音失败，请重试');
+        stream.getTracks().forEach(track => track.stop());
+        setIsRecording(false);
+      }
     } catch (err) {
-      console.error("录音失败:", err);
-      alert("无法访问麦克风，请确保已授予权限。");
-      // 确保在出错时重置所有状态
-      setIsRecording(false);
+      console.error('录音初始化过程出现未知错误:', err);
+      message.error('录音初始化失败，请刷新页面重试');
     }
   };
 
