@@ -5,12 +5,14 @@ interface MetronomeSettings {
   volume: number;
   soundType: "beep" | "click" | "wood";
   accentVolume: number;
+  accentFirst: boolean;
 }
 
 const DEFAULT_SETTINGS = {
   volume: 0.5,
   soundType: "click" as const,
   accentVolume: 0.6,
+  accentFirst: true,
 };
 
 interface SettingsState {

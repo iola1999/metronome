@@ -18,22 +18,23 @@ const SettingSection = styled.div`
 const SettingRow = styled.div`
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: ${({ theme }) => theme.spacing.md};
   margin-bottom: ${({ theme }) => theme.spacing.sm};
 
   label {
-    flex: 1;
+    flex: none;
     color: ${({ theme }) => theme.colors.primary};
   }
 `;
 
 const Slider = styled.input`
-  flex: 2;
+  width: 120px;
   height: 32px;
 `;
 
 const Select = styled.select`
-  flex: 2;
+  width: 120px;
   height: 32px;
   padding: 0 ${({ theme }) => theme.spacing.sm};
   border-radius: ${({ theme }) => theme.borderRadius.sm};
@@ -128,6 +129,51 @@ const LoadingSpinner = styled.div`
     to {
       transform: rotate(360deg);
     }
+  }
+`;
+
+const Switch = styled.label`
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  span {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: ${({ theme }) => `${theme.colors.primary}33`};
+    transition: .3s;
+    border-radius: 20px;
+
+    &:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+  }
+
+  input:checked + span {
+    background-color: ${({ theme }) => theme.colors.accent};
+  }
+
+  input:checked + span:before {
+    transform: translateX(16px);
   }
 `;
 
@@ -256,6 +302,19 @@ export const Settings = ({ isOpen, onClose }: SettingsProps) => {
               setMetronomeSettings({ accentVolume: Number(e.target.value) })
             }
           />
+        </SettingRow>
+        <SettingRow>
+          <label>首拍重音</label>
+          <Switch>
+            <input
+              type="checkbox"
+              checked={metronome.accentFirst}
+              onChange={(e) =>
+                setMetronomeSettings({ accentFirst: e.target.checked })
+              }
+            />
+            <span />
+          </Switch>
         </SettingRow>
       </SettingSection>
 

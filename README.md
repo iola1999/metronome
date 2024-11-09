@@ -8,7 +8,7 @@
 
 一个简单但功能完整的在线节拍器应用，支持 PWA 安装。
 
-🌐 在线体验：[https://metronome-8pc.pages.dev/](https://metronome-8pc.pages.dev/)
+🌐 在线体验：[https://metronome.678234.xyz/](https://metronome.678234.xyz/)
 
 ### 📱 安装到设备
 

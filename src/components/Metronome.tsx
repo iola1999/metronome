@@ -53,7 +53,7 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
   }, [tempo]);
 
   const playClick = useCallback(async (beatNumber: number) => {
-    const { volume, accentVolume, soundType } =
+    const { volume, accentVolume, soundType, accentFirst } =
       useSettingsStore.getState().metronome;
 
     if (!audioContextRef.current) {
@@ -84,7 +84,7 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
     };
 
     const now = audioContextRef.current.currentTime;
-    const isAccent = beatNumber === 0;
+    const isAccent = accentFirst && beatNumber === 0;
 
     oscillator.frequency.value = getSoundFrequency(isAccent);
     gainNode.gain.value = isAccent ? accentVolume : volume;
