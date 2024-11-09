@@ -70,7 +70,7 @@ export const Pendulum = styled.div`
   transform-origin: bottom center;
 
   &.active {
-    animation: swing calc(60s / var(--tempo)) infinite;
+    animation: swing calc(120s / var(--tempo)) infinite;
     animation-timing-function: cubic-bezier(0.4, 0.0, 0.6, 1.0);
   }
 

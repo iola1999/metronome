@@ -143,7 +143,7 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
 
   const startTicking = useCallback(() => {
     const currentTempo = tempo ?? METRONOME_CONFIG.BPM.DEFAULT;
-    const interval = (60 / currentTempo) * 1000; // 一个完整周期的时间
+    const interval = (60 / currentTempo) * 2000;
 
     const tick = async () => {
       if (!isPlaying) return;
