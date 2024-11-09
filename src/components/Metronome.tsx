@@ -105,7 +105,8 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
     const isAccent = accentFirst && beatNumber === 0;
 
     oscillator.frequency.value = getSoundFrequency(isAccent);
-    gainNode.gain.value = isAccent ? accentVolume : volume;
+    const clickVolume = isAccent ? volume * accentVolume : volume;
+    gainNode.gain.value = clickVolume;
 
     switch (soundType) {
       case "beep":

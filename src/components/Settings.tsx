@@ -152,7 +152,7 @@ const Switch = styled.label`
     right: 0;
     bottom: 0;
     background-color: ${({ theme }) => `${theme.colors.primary}33`};
-    transition: .3s;
+    transition: 0.3s;
     border-radius: 20px;
 
     &:before {
@@ -163,7 +163,7 @@ const Switch = styled.label`
       left: 3px;
       bottom: 3px;
       background-color: white;
-      transition: .3s;
+      transition: 0.3s;
       border-radius: 50%;
     }
   }
@@ -226,7 +226,7 @@ export const Settings = ({ isOpen, onClose }: SettingsProps) => {
       // 创建数据库实例
       const db = new RecordingsDB();
       await db.init();
-      
+
       // 获取所有录音并逐个删除
       const recordings = await db.getAllRecordings();
       for (const recording of recordings) {
@@ -239,8 +239,6 @@ export const Settings = ({ isOpen, onClose }: SettingsProps) => {
       setShowClearDataConfirm(false);
       // 触发录音列表更新事件
       eventBus.emit("recordingsUpdated");
-      // 关闭设置弹窗
-      onClose();
     } catch (error) {
       console.error("删除数据失败:", error);
       message.error("删除数据失败，请重试");
@@ -278,7 +276,7 @@ export const Settings = ({ isOpen, onClose }: SettingsProps) => {
           </Select>
         </SettingRow>
         <SettingRow>
-          <label>音量</label>
+          <label>总音量</label>
           <Slider
             type="range"
             min="0"
@@ -287,19 +285,6 @@ export const Settings = ({ isOpen, onClose }: SettingsProps) => {
             value={metronome.volume}
             onChange={(e) =>
               setMetronomeSettings({ volume: Number(e.target.value) })
-            }
-          />
-        </SettingRow>
-        <SettingRow>
-          <label>重拍音量</label>
-          <Slider
-            type="range"
-            min="0"
-            max="1"
-            step="0.1"
-            value={metronome.accentVolume}
-            onChange={(e) =>
-              setMetronomeSettings({ accentVolume: Number(e.target.value) })
             }
           />
         </SettingRow>
@@ -316,6 +301,21 @@ export const Settings = ({ isOpen, onClose }: SettingsProps) => {
             <span />
           </Switch>
         </SettingRow>
+        {metronome.accentFirst && (
+          <SettingRow>
+            <label>重音音量</label>
+            <Slider
+              type="range"
+              min="0"
+              max="1"
+              step="0.1"
+              value={metronome.accentVolume}
+              onChange={(e) =>
+                setMetronomeSettings({ accentVolume: Number(e.target.value) })
+              }
+            />
+          </SettingRow>
+        )}
       </SettingSection>
 
       <ActionSection>
