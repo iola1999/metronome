@@ -75,9 +75,9 @@ export const Pendulum = styled.div`
   }
 
   @keyframes swing {
-    0% { transform: rotate(calc(min(20deg, 15deg * (120 / var(--tempo))))); }
-    50% { transform: rotate(calc(max(-20deg, -15deg * (120 / var(--tempo))))); }
-    100% { transform: rotate(calc(min(20deg, 15deg * (120 / var(--tempo))))); }
+    0% { transform: rotate(calc(min(40deg, 30deg * (120 / var(--tempo))))); }
+    50% { transform: rotate(calc(max(-40deg, -30deg * (120 / var(--tempo))))); }
+    100% { transform: rotate(calc(min(40deg, 30deg * (120 / var(--tempo))))); }
   }
 `;
 
