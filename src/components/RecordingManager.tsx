@@ -207,9 +207,11 @@ export const RecordingManager = ({
       try {
         stream = await navigator.mediaDevices.getUserMedia({
           audio: {
-            echoCancellation: true,
-            noiseSuppression: true,
-            autoGainControl: true,
+            echoCancellation: true,      // 开启回声消除，过滤掉扬声器发出的节拍声
+            noiseSuppression: true,      // 开启降噪，帮助过滤掉节拍声
+            autoGainControl: true,       // 开启自动增益，让乐器声音保持合适音量
+            channelCount: 2,             // 使用立体声录音，获得更好的乐器音质。重点是可以避免开始录音时节拍声音被抑制
+            sampleRate: 48000,           // 使用较高的采样率，提升录音质量
           },
         });
       } catch (err) {

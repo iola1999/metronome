@@ -37,13 +37,17 @@ export const RecordingList = ({
     onClose();
   };
 
+  const sortedRecordings = [...recordings].sort((a, b) => 
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="录音历史">
       <RecordingsList>
         {recordings.length === 0 ? (
           <NoRecordings>暂无录音</NoRecordings>
         ) : (
-          recordings.map((recording) => (
+          sortedRecordings.map((recording) => (
             <RecordingItem
               key={recording.id}
               recording={recording}
