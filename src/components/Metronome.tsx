@@ -29,6 +29,24 @@ interface MetronomeProps {
   onPlayingChange: (isPlaying: boolean) => void;
 }
 
+// 添加常量配置
+const METRONOME_CONFIG = {
+  BPM: {
+    MIN: 30,
+    MAX: 180,
+    DEFAULT: 120,
+    PRESETS: [60, 90, 120, 140] as const
+  },
+  SWING: {
+    ANGLE: 30, // 摆动角度
+    DURATION_FORMULA: 60 // 用于计算摆动周期：DURATION_FORMULA / tempo
+  },
+  PENDULUM: {
+    MIN_POS: 20,  // 配重块最高位置
+    MAX_POS: 140  // 配重块最低位置
+  }
+} as const;
+
 export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
   const [tempo, setTempo] = useState<number | null>(null);
   const [currentBeat, setCurrentBeat] = useState(-1);
@@ -123,25 +141,29 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
   }, []);
 
   const startTicking = useCallback(() => {
-    const currentTempo = tempo ?? 120;
-    const interval = (60 / currentTempo) * 1000;
+    const currentTempo = tempo ?? METRONOME_CONFIG.BPM.DEFAULT;
+    const interval = (60 / currentTempo) * 1000; // 一个完整周期的时间
 
     const tick = async () => {
       if (!isPlaying) return;
 
-      // 设置下一次的定时器（一个完整周期）
+      // 设置下一次的完整周期定时器
       tickTimeoutRef.current = window.setTimeout(tick, interval);
 
-      // 在摆针到达两侧时设置定时器，让声音在经过中间时触发
-      setTimeout(async () => {
-        beatCountRef.current = (beatCountRef.current + 1) % 4;
-        await playClick(beatCountRef.current);
-      }, interval / 4); // 四分之一周期后（摆针经过中点时）发声
+      // 计算摆锤从一边到中间的时间（四分之一周期）
+      const quarterPeriod = interval / 4;
 
+      // 等待摆锤到达中间位置
       setTimeout(async () => {
         beatCountRef.current = (beatCountRef.current + 1) % 4;
         await playClick(beatCountRef.current);
-      }, interval * 3/4); // 四分之三周期后（摆针再次经过中点时）发声
+      }, quarterPeriod);
+
+      // 等待摆锤从另一边到达中间位置
+      setTimeout(async () => {
+        beatCountRef.current = (beatCountRef.current + 1) % 4;
+        await playClick(beatCountRef.current);
+      }, quarterPeriod * 3);
     };
 
     beatCountRef.current = -1;
@@ -170,7 +192,10 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
   }, [isPlaying, isDragging, startTicking]);
 
   const handleTempoChange = (newTempo: number) => {
-    const clampedTempo = Math.min(Math.max(newTempo, 30), 240);
+    const clampedTempo = Math.min(
+      Math.max(newTempo, METRONOME_CONFIG.BPM.MIN),
+      METRONOME_CONFIG.BPM.MAX
+    );
     setTempo(clampedTempo);
     setIsTempoChanging(true);
     setTimeout(() => setIsTempoChanging(false), 300);
@@ -182,11 +207,11 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
 
   // 修改配重块位置计算逻辑
   const calculateBobPosition = useCallback((currentTempo: number) => {
-    // 速度范围是30-240，我们将配重块位置映射到20-140px
-    const minPos = 20; // 最高位置（最慢速度）
-    const maxPos = 140; // 最低位置（最快速度）
+    const { MIN_POS, MAX_POS } = METRONOME_CONFIG.PENDULUM;
+    const { MIN, MAX } = METRONOME_CONFIG.BPM;
+    
     const position =
-      minPos + ((currentTempo - 30) / (240 - 30)) * (maxPos - minPos);
+      MIN_POS + ((currentTempo - MIN) / (MAX - MIN)) * (MAX_POS - MIN_POS);
     return Math.round(position);
   }, []);
 
@@ -230,9 +255,9 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
       <TempoControl>
         <TempoSlider
           type="range"
-          min="30"
-          max="240"
-          value={tempo ?? 120}
+          min={METRONOME_CONFIG.BPM.MIN}
+          max={METRONOME_CONFIG.BPM.MAX}
+          value={tempo ?? METRONOME_CONFIG.BPM.DEFAULT}
           onMouseDown={() => {
             setIsDragging(true);
             if (isPlaying && tickTimeoutRef.current) {
@@ -252,7 +277,7 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
           onChange={handleSliderChange}
         />
         <TempoPresets>
-          {[60, 90, 120, 160].map((presetTempo) => (
+          {METRONOME_CONFIG.BPM.PRESETS.map((presetTempo) => (
             <PresetButton
               key={presetTempo}
               isSelected={Number(tempo) === presetTempo}

@@ -8,20 +8,70 @@ export const Controls = styled.div`
 
 export const PendulumContainer = styled.div`
   height: 200px;
+  width: 100%;
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  margin-bottom: 20px;
+  padding-top: 20px;
+`;
+
+export const PendulumArm = styled.div`
+  width: 4px;
+  height: 140px;
+  background: linear-gradient(to right, #666666, #999999, #666666);
+  position: absolute;
+  bottom: 10px;
+  transform-origin: bottom center;
+  box-shadow: 
+    -1px 0 1px rgba(255, 255, 255, 0.5),
+    1px 0 1px rgba(0, 0, 0, 0.3);
+`;
+
+export const PendulumBob = styled.div`
+  width: 24px;
+  height: 40px;
+  position: absolute;
+  left: 50%;
+  bottom: 140px;
+  transform: translateX(-50%);
+  background: linear-gradient(to right,
+    #d0d0d0,
+    #e8e8e8 20%,
+    #f5f5f5 40%,
+    #e8e8e8 80%,
+    #d0d0d0 100%
+  );
+  border: 1px solid #999;
+  box-shadow: 
+    inset -1px -1px 2px rgba(0, 0, 0, 0.2),
+    inset 1px 1px 2px rgba(255, 255, 255, 0.3),
+    2px 2px 4px rgba(0, 0, 0, 0.1);
+  
+  // 添加刻度线效果
+  &::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px;
+    height: 2px;
+    background: #999;
+  }
 `;
 
 export const Pendulum = styled.div`
   position: relative;
-  height: 160px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
   transform-origin: bottom center;
-  transition: transform 0.2s ease;
 
   &.active {
-    animation: swing calc(60s / var(--tempo)) infinite ease-in-out;
+    animation: swing calc(60s / var(--tempo)) infinite;
+    animation-timing-function: cubic-bezier(0.4, 0.0, 0.6, 1.0);
   }
 
   @keyframes swing {
@@ -29,27 +79,6 @@ export const Pendulum = styled.div`
     50% { transform: rotate(-30deg); }
     100% { transform: rotate(30deg); }
   }
-`;
-
-export const PendulumArm = styled.div`
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 2px;
-  height: 100%;
-  background: #666;
-  transform: translateX(-50%);
-`;
-
-export const PendulumBob = styled.div`
-  position: absolute;
-  top: 20px;
-  left: 50%;
-  width: 20px;
-  height: 20px;
-  background: #333;
-  border-radius: 50%;
-  transform: translateX(-50%);
 `;
 
 export const TempoDisplay = styled.div`
