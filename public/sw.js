@@ -60,6 +60,11 @@ self.addEventListener("activate", (event) => {
 
 // 处理请求 - 缓存优先策略，对所有请求进行缓存
 self.addEventListener("fetch", (event) => {
+  // 忽略非 http(s) 请求
+  if (!event.request.url.startsWith("http")) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((response) => {
       if (response) {

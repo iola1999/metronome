@@ -37,7 +37,7 @@ export const App = () => {
       // 注册更新检查的消息监听
       navigator.serviceWorker.addEventListener("message", (event) => {
         if (event.data.type === "UPDATE_AVAILABLE") {
-          message.info("应用已更新，下次启动时生效");
+          message.info("应用已更新，下次启动时生效2");
         }
       });
 
