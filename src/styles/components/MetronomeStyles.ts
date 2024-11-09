@@ -7,55 +7,49 @@ export const Controls = styled.div`
 `;
 
 export const PendulumContainer = styled.div`
-  height: 100px;
-  position: relative;
-  margin-bottom: ${({ theme }) => theme.spacing.xs};
-  overflow: hidden;
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  margin-bottom: 20px;
 `;
 
 export const Pendulum = styled.div`
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: 4px;
-  height: 80px;
-  transform-origin: top center;
-  transform: translateX(-50%);
+  position: relative;
+  height: 160px;
+  transform-origin: bottom center;
+  transition: transform 0.2s ease;
 
   &.active {
-    animation: swing calc(60s / var(--tempo)) infinite ease-in-out alternate;
+    animation: swing calc(60s / var(--tempo)) infinite ease-in-out;
   }
 
   @keyframes swing {
-    0% {
-      transform: translateX(-50%) rotate(-30deg);
-    }
-    100% {
-      transform: translateX(-50%) rotate(30deg);
-    }
+    0% { transform: rotate(30deg); }
+    50% { transform: rotate(-30deg); }
+    100% { transform: rotate(30deg); }
   }
 `;
 
 export const PendulumArm = styled.div`
-  width: 100%;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
   height: 100%;
-  background: linear-gradient(
-    to bottom,
-    ${({ theme }) => theme.colors.accent},
-    ${({ theme }) => `${theme.colors.accent}cc`}
-  );
+  background: #666;
+  transform: translateX(-50%);
 `;
 
 export const PendulumBob = styled.div`
   position: absolute;
-  bottom: -12px;
+  top: 20px;
   left: 50%;
-  width: 24px;
-  height: 24px;
-  background: ${({ theme }) => theme.colors.accent};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
+  width: 20px;
+  height: 20px;
+  background: #333;
+  border-radius: 50%;
   transform: translateX(-50%);
-  box-shadow: ${({ theme }) => theme.shadows.sm};
 `;
 
 export const TempoDisplay = styled.div`
@@ -176,23 +170,17 @@ export const TempoPresets = styled.div`
   margin-top: ${({ theme }) => theme.spacing.sm};
 `;
 
-export const PresetButton = styled.button<{ active?: boolean }>`
-  padding: ${({ theme }) => `${theme.spacing.xs} ${theme.spacing.md}`};
+export const PresetButton = styled.button<{ isSelected?: boolean }>`
+  padding: 8px 16px;
   font-size: 1rem;
-  background-color: ${({ theme, active }) =>
-    active ? theme.colors.accent : theme.colors.background};
-  color: ${({ theme, active }) => (active ? "white" : theme.colors.primary)};
-  border-radius: ${({ theme }) => theme.borderRadius.sm};
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  transform-origin: center;
+  border: none;
+  background: ${props => props.isSelected ? '#007AFF' : '#f0f0f0'};
+  color: ${props => props.isSelected ? 'white' : 'black'};
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.2s;
 
   &:hover {
-    background-color: ${({ theme }) => theme.colors.accent};
-    color: white;
     transform: translateY(-2px);
-  }
-
-  &:active {
-    transform: scale(0.95);
   }
 `;

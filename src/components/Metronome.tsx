@@ -129,11 +129,19 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
     const tick = async () => {
       if (!isPlaying) return;
 
-      beatCountRef.current = (beatCountRef.current + 1) % 4;
-
-      await playClick(beatCountRef.current);
-
+      // 设置下一次的定时器（一个完整周期）
       tickTimeoutRef.current = window.setTimeout(tick, interval);
+
+      // 在摆针到达两侧时设置定时器，让声音在经过中间时触发
+      setTimeout(async () => {
+        beatCountRef.current = (beatCountRef.current + 1) % 4;
+        await playClick(beatCountRef.current);
+      }, interval / 4); // 四分之一周期后（摆针经过中点时）发声
+
+      setTimeout(async () => {
+        beatCountRef.current = (beatCountRef.current + 1) % 4;
+        await playClick(beatCountRef.current);
+      }, interval * 3/4); // 四分之三周期后（摆针再次经过中点时）发声
     };
 
     beatCountRef.current = -1;
@@ -164,7 +172,6 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
   const handleTempoChange = (newTempo: number) => {
     const clampedTempo = Math.min(Math.max(newTempo, 30), 240);
     setTempo(clampedTempo);
-
     setIsTempoChanging(true);
     setTimeout(() => setIsTempoChanging(false), 300);
   };
@@ -173,15 +180,33 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
     handleTempoChange(parseInt(e.target.value));
   };
 
+  // 修改配重块位置计算逻辑
+  const calculateBobPosition = useCallback((currentTempo: number) => {
+    // 速度范围是30-240，我们将配重块位置映射到20-140px
+    const minPos = 20; // 最高位置（最慢速度）
+    const maxPos = 140; // 最低位置（最快速度）
+    const position =
+      minPos + ((currentTempo - 30) / (240 - 30)) * (maxPos - minPos);
+    return Math.round(position);
+  }, []);
+
   return (
-    <Controls style={{ visibility: isLoaded ? 'visible' : 'hidden' }}>
+    <Controls style={{ visibility: isLoaded ? "visible" : "hidden" }}>
       <PendulumContainer>
         <Pendulum
           className={isPlaying ? "active" : ""}
-          style={{ "--tempo": tempo } as React.CSSProperties}
+          style={
+            {
+              "--tempo": tempo,
+            } as React.CSSProperties
+          }
         >
           <PendulumArm />
-          <PendulumBob />
+          <PendulumBob
+            style={{
+              top: `${calculateBobPosition(tempo ?? 120)}px`,
+            }}
+          />
         </Pendulum>
       </PendulumContainer>
 
@@ -230,7 +255,7 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
           {[60, 90, 120, 160].map((presetTempo) => (
             <PresetButton
               key={presetTempo}
-              active={tempo === presetTempo}
+              isSelected={Number(tempo) === presetTempo}
               onClick={() => handleTempoChange(presetTempo)}
             >
               {presetTempo}
