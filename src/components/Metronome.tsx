@@ -166,6 +166,7 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
   const startTicking = useCallback(() => {
     const currentTempo = tempo ?? METRONOME_CONFIG.BPM.DEFAULT;
     const interval = (60 / currentTempo) * 1000;
+    const halfInterval = interval / 2; // 添加半拍间隔
 
     const tick = () => {
       if (!isPlaying) return;
@@ -174,14 +175,14 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
       const firstBeatTimeout = setTimeout(() => {
         beatCountRef.current = (beatCountRef.current + 1) % beatsPerBar;
         playClick(beatCountRef.current);
-      }, 0) as unknown as number;
+      }, halfInterval) as unknown as number; // 延迟半拍，使声音在中间位置发出
 
       // 剩余的拍子
       for (let i = 1; i < beatsPerBar; i++) {
         const nextBeatTimeout = setTimeout(() => {
           beatCountRef.current = (beatCountRef.current + 1) % beatsPerBar;
           playClick(beatCountRef.current);
-        }, interval * i) as unknown as number;
+        }, interval * i + halfInterval) as unknown as number; // 每拍都延迟半拍
         timeoutIdsRef.current.push(nextBeatTimeout);
       }
 
