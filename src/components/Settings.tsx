@@ -14,12 +14,19 @@ const SettingSection = styled.div`
   }
 
   h3 {
-    margin-bottom: ${({ theme }) => theme.spacing.sm};
+    margin: -${({ theme }) => theme.spacing.md} -${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.md};
+    padding: ${({ theme }) => theme.spacing.md};
     color: ${({ theme }) => theme.colors.primary};
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
     position: sticky;
     top: 0;
-    background: ${({ theme }) => theme.colors.background};
-    padding: ${({ theme }) => theme.spacing.xs} 0;
+    background: ${({ theme }) => `${theme.colors.primary}08`};
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(64px);
+    border-bottom: 1px solid ${({ theme }) => `${theme.colors.primary}1a`};
     z-index: 1;
   }
 `;
@@ -364,34 +371,49 @@ export const Settings = ({ isOpen, onClose }: SettingsProps) => {
             </SettingRow>
           )}
         </SettingSection>
+
+        <SettingSection>
+          <h3>系统</h3>
+          <SettingRow>
+            <label>清除缓存</label>
+            <ActionButton 
+              onClick={clearCache} 
+              disabled={isClearing}
+              style={{ width: '120px' }}
+            >
+              {isClearing ? (
+                <>
+                  <LoadingSpinner />
+                  清除中...
+                </>
+              ) : (
+                "清除"
+              )}
+            </ActionButton>
+          </SettingRow>
+          <SettingRow>
+            <label>恢复默认设置</label>
+            <ActionButton
+              onClick={handleResetSettings}
+              className={showResetConfirm ? "confirming" : ""}
+              style={{ width: '120px' }}
+            >
+              {showResetConfirm ? "确认重置" : "重置"}
+            </ActionButton>
+          </SettingRow>
+          <SettingRow>
+            <label>删除所有录音</label>
+            <ActionButton
+              variant="danger"
+              onClick={clearData}
+              className={showClearDataConfirm ? "confirming" : ""}
+              style={{ width: '120px' }}
+            >
+              {showClearDataConfirm ? "确认删除" : "删除"}
+            </ActionButton>
+          </SettingRow>
+        </SettingSection>
       </SettingsContent>
-
-      <ActionSection>
-        <ActionButton onClick={clearCache} disabled={isClearing}>
-          {isClearing ? (
-            <>
-              <LoadingSpinner />
-              正在清除缓存...
-            </>
-          ) : (
-            "清除应用缓存"
-          )}
-        </ActionButton>
-        <ActionButton
-          onClick={handleResetSettings}
-          className={showResetConfirm ? "confirming" : ""}
-        >
-          {showResetConfirm ? "再次点击确认重置" : "恢复默认设置"}
-        </ActionButton>
-
-        <ActionButton
-          variant="danger"
-          onClick={clearData}
-          className={showClearDataConfirm ? "confirming" : ""}
-        >
-          {showClearDataConfirm ? "再次点击确认删除所有录音" : "删除所有录音"}
-        </ActionButton>
-      </ActionSection>
     </Modal>
   );
 };
