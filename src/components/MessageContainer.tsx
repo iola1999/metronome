@@ -12,8 +12,9 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
   pointer-events: none;
+  padding-top: calc(env(safe-area-inset-top, 20px) + 20px);
+  padding-bottom: 20px;
 `;
 
 interface MessageItem {
@@ -30,7 +31,10 @@ const MessageContainer = () => {
   useEffect(() => {
     setMounted(true);
     const handleMessage = (event: CustomEvent<MessageItem>) => {
-      setMessages(prev => [...prev, event.detail]);
+      const newMessage = event.detail;
+      
+      // 添加新消息
+      setMessages(prev => [...prev, newMessage]);
     };
 
     window.addEventListener('show-message' as any, handleMessage);
@@ -60,5 +64,4 @@ const MessageContainer = () => {
   );
 };
 
-// 默认导出组件
 export default MessageContainer; 

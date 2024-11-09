@@ -1,12 +1,10 @@
 import styled from "@emotion/styled";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
-const MessageContainer = styled.div<{ type: MessageType; visible: boolean }>`
-  position: fixed;
-  top: calc(env(safe-area-inset-top, 20px) + 20px);
-  left: 50%;
-  transform: translateX(-50%) translateY(${({ visible }) => visible ? '0' : '-20px'});
+const MessageContainer = styled.div<{ type: MessageType; visible: boolean; height: number }>`
   opacity: ${({ visible }) => visible ? '1' : '0'};
+  margin-bottom: ${({ visible, height }) => visible ? '8px' : '0'};
+  height: ${({ visible, height }) => visible ? `${height}px` : '0'};
   background: ${({ theme, type }) => {
     switch (type) {
       case 'error':
@@ -20,7 +18,7 @@ const MessageContainer = styled.div<{ type: MessageType; visible: boolean }>`
     }
   }};
   color: white;
-  padding: ${({ theme }) => `${theme.spacing.xs} ${theme.spacing.md}`};
+  padding: ${({ theme }) => `${theme.spacing.md} ${theme.spacing.md}`};
   border-radius: ${({ theme }) => theme.borderRadius.full};
   font-size: 0.9rem;
   box-shadow: ${({ theme }) => theme.shadows.md};
@@ -29,8 +27,13 @@ const MessageContainer = styled.div<{ type: MessageType; visible: boolean }>`
   display: flex;
   align-items: center;
   gap: 8px;
-  max-width: calc(100vw - 32px);
+  max-width: min(320px, calc(100vw - 48px));
   pointer-events: none;
+  transform: translateY(${({ visible }) => visible ? '0' : '-20px'});
+  overflow: hidden;
+  box-sizing: border-box;
+  word-break: break-word;
+  line-height: 1.4;
 `;
 
 const IconWrapper = styled.div`
@@ -59,17 +62,36 @@ interface MessageProps {
 
 export const Message = ({ type = 'info', children, duration = 3000, onClose }: MessageProps) => {
   const [visible, setVisible] = useState(true);
+  const [height, setHeight] = useState(0);
+  const [removed, setRemoved] = useState(false);
+  const messageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    if (messageRef.current) {
+      setHeight(messageRef.current.offsetHeight);
+    }
+
+    const hideTimer = setTimeout(() => {
       setVisible(false);
-      setTimeout(() => {
-        onClose?.();
-      }, 300);
     }, duration);
 
-    return () => clearTimeout(timer);
-  }, [duration, onClose]);
+    return () => clearTimeout(hideTimer);
+  }, [duration]);
+
+  // 监听 visible 状态变化，处理动画完成后的移除
+  useEffect(() => {
+    if (!visible && !removed) {
+      const removeTimer = setTimeout(() => {
+        setRemoved(true);
+        onClose?.();
+      }, 300); // 动画持续时间
+
+      return () => clearTimeout(removeTimer);
+    }
+  }, [visible, removed, onClose]);
+
+  // 如果已被标记为移除，不再渲染
+  if (removed) return null;
 
   const icons = {
     error: (
@@ -102,7 +124,7 @@ export const Message = ({ type = 'info', children, duration = 3000, onClose }: M
   };
 
   return (
-    <MessageContainer type={type} visible={visible}>
+    <MessageContainer ref={messageRef} type={type} visible={visible} height={height}>
       <IconWrapper>{icons[type]}</IconWrapper>
       {children}
     </MessageContainer>
