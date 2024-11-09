@@ -4,6 +4,7 @@ import { Modal } from "./Modal";
 import { useState } from "react";
 import { message } from "./Message";
 import { eventBus } from "../util/events";
+import { RecordingsDB } from "../util/db";
 
 const SettingSection = styled.div`
   padding: ${({ theme }) => theme.spacing.md};
@@ -176,22 +177,28 @@ export const Settings = ({ isOpen, onClose }: SettingsProps) => {
     }
 
     try {
-      // 清除 IndexedDB 数据
-      const DBDeleteRequest = indexedDB.deleteDatabase("MetronomeRecordings");
-      DBDeleteRequest.onsuccess = () => {
-        message.success("已删除所有录音");
-        setShowClearDataConfirm(false);
-        // 触发录音列表更新事件
-        eventBus.emit("recordingsUpdated");
-        // 关闭设置弹窗
-        onClose();
-      };
-      DBDeleteRequest.onerror = () => {
-        throw new Error("删除数据失败");
-      };
+      // 创建数据库实例
+      const db = new RecordingsDB();
+      await db.init();
+      
+      // 获取所有录音并逐个删除
+      const recordings = await db.getAllRecordings();
+      for (const recording of recordings) {
+        if (recording.id) {
+          await db.deleteRecording(recording.id);
+        }
+      }
+
+      message.success("已删除所有录音");
+      setShowClearDataConfirm(false);
+      // 触发录音列表更新事件
+      eventBus.emit("recordingsUpdated");
+      // 关闭设置弹窗
+      onClose();
     } catch (error) {
       console.error("删除数据失败:", error);
       message.error("删除数据失败，请重试");
+      setShowClearDataConfirm(false);
     }
   };
 
