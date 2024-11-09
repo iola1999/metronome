@@ -7,25 +7,32 @@ interface MetronomeSettings {
   accentVolume: number;
 }
 
+const DEFAULT_SETTINGS = {
+  volume: 0.5,
+  soundType: "click" as const,
+  accentVolume: 0.6,
+};
+
 interface SettingsState {
   metronome: MetronomeSettings;
   setMetronomeSettings: (settings: Partial<MetronomeSettings>) => void;
+  resetSettings: () => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
-      metronome: {
-        volume: 0.5,
-        soundType: "click",
-        accentVolume: 0.6,
-      },
+      metronome: DEFAULT_SETTINGS,
       setMetronomeSettings: (settings) =>
         set((state) => ({
           metronome: {
             ...state.metronome,
             ...settings,
           },
+        })),
+      resetSettings: () =>
+        set(() => ({
+          metronome: DEFAULT_SETTINGS,
         })),
     }),
     {

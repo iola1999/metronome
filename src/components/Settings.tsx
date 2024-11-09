@@ -2,6 +2,8 @@ import styled from "@emotion/styled";
 import { useSettingsStore } from "../store/settings";
 import { Modal } from "./Modal";
 import { useState } from "react";
+import { message } from "./Message";
+import { eventBus } from "../util/events";
 
 const SettingSection = styled.div`
   padding: ${({ theme }) => theme.spacing.md};
@@ -37,18 +39,18 @@ const Select = styled.select`
   border: 1px solid ${({ theme }) => `${theme.colors.primary}33`};
   background: ${({ theme }) => theme.colors.background};
   color: ${({ theme }) => theme.colors.primary};
-  
+
   /* 禁用 iOS 上的默认选中效果 */
   -webkit-appearance: none;
   appearance: none;
   outline: none;
-  
+
   /* 添加自定义箭头 */
   background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 8px center;
   padding-right: 32px;
-  
+
   &:focus {
     border-color: ${({ theme }) => theme.colors.accent};
     box-shadow: 0 0 0 2px ${({ theme }) => `${theme.colors.accent}33`};
@@ -58,14 +60,21 @@ const Select = styled.select`
 const ActionSection = styled.div`
   padding: ${({ theme }) => theme.spacing.md};
   border-top: 1px solid ${({ theme }) => `${theme.colors.primary}1a`};
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.sm};
 `;
 
-const ActionButton = styled.button`
+const ActionButton = styled.button<{ variant?: "primary" | "danger" }>`
   width: 100%;
   padding: ${({ theme }) => theme.spacing.sm};
   border-radius: ${({ theme }) => theme.borderRadius.sm};
-  background: ${({ theme }) => `${theme.colors.error}1a`};
-  color: ${({ theme }) => theme.colors.error};
+  background: ${({ theme, variant }) =>
+    variant === "danger"
+      ? `${theme.colors.error}1a`
+      : `${theme.colors.primary}1a`};
+  color: ${({ theme, variant }) =>
+    variant === "danger" ? theme.colors.error : theme.colors.primary};
   font-size: 0.9rem;
   transition: all 0.2s ease;
   display: flex;
@@ -79,11 +88,30 @@ const ActionButton = styled.button`
   }
 
   &:not(:disabled):hover {
-    background: ${({ theme }) => `${theme.colors.error}33`};
+    background: ${({ theme, variant }) =>
+      variant === "danger"
+        ? `${theme.colors.error}33`
+        : `${theme.colors.primary}33`};
   }
 
   &:not(:disabled):active {
     transform: scale(0.98);
+  }
+
+  &.confirming {
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.02);
+    }
+    100% {
+      transform: scale(1);
+    }
   }
 `;
 
@@ -108,42 +136,75 @@ interface SettingsProps {
 }
 
 export const Settings = ({ isOpen, onClose }: SettingsProps) => {
-  const { metronome, setMetronomeSettings } = useSettingsStore();
+  const { metronome, setMetronomeSettings, resetSettings } = useSettingsStore();
   const [isClearing, setIsClearing] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showClearDataConfirm, setShowClearDataConfirm] = useState(false);
 
   const clearCache = async () => {
     setIsClearing(true);
     try {
-      // 检查是否支持 Service Worker
-      if ('serviceWorker' in navigator) {
-        // 获取所有的 Service Worker 注册
+      if ("serviceWorker" in navigator) {
         const registrations = await navigator.serviceWorker.getRegistrations();
-        
-        // 清除每个 Service Worker 的缓存
-        await Promise.all(registrations.map(async (registration) => {
-          // 获取该 Service Worker 控制的所有缓存名称
-          const cacheNames = await caches.keys();
-          
-          // 删除所有缓存
-          await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
-          
-          // 注销 Service Worker
-          await registration.unregister();
-        }));
-
-        // 刷新页面以重新安装 Service Worker
+        await Promise.all(
+          registrations.map(async (registration) => {
+            const cacheNames = await caches.keys();
+            await Promise.all(
+              cacheNames.map((cacheName) => caches.delete(cacheName))
+            );
+            await registration.unregister();
+          })
+        );
         window.location.reload();
       } else {
-        // 如果不支持 Service Worker，等待一小段时间后显示成功
-        await new Promise(resolve => setTimeout(resolve, 800));
-        alert('缓存已清除');
+        await new Promise((resolve) => setTimeout(resolve, 800));
+        message.success("缓存已清除");
         setIsClearing(false);
       }
     } catch (error) {
-      console.error('清除缓存失败:', error);
-      alert('清除缓存失败，请重试');
+      console.error("清除缓存失败:", error);
+      message.error("清除缓存失败，请重试");
       setIsClearing(false);
     }
+  };
+
+  const clearData = async () => {
+    if (!showClearDataConfirm) {
+      setShowClearDataConfirm(true);
+      setTimeout(() => setShowClearDataConfirm(false), 3000);
+      return;
+    }
+
+    try {
+      // 清除 IndexedDB 数据
+      const DBDeleteRequest = indexedDB.deleteDatabase("MetronomeRecordings");
+      DBDeleteRequest.onsuccess = () => {
+        message.success("已删除所有录音");
+        setShowClearDataConfirm(false);
+        // 触发录音列表更新事件
+        eventBus.emit("recordingsUpdated");
+        // 关闭设置弹窗
+        onClose();
+      };
+      DBDeleteRequest.onerror = () => {
+        throw new Error("删除数据失败");
+      };
+    } catch (error) {
+      console.error("删除数据失败:", error);
+      message.error("删除数据失败，请重试");
+    }
+  };
+
+  const handleResetSettings = () => {
+    if (!showResetConfirm) {
+      setShowResetConfirm(true);
+      setTimeout(() => setShowResetConfirm(false), 3000);
+      return;
+    }
+
+    resetSettings();
+    message.success("设置已重置");
+    setShowResetConfirm(false);
   };
 
   return (
@@ -192,30 +253,29 @@ export const Settings = ({ isOpen, onClose }: SettingsProps) => {
       </SettingSection>
 
       <ActionSection>
-        <ActionButton 
-          onClick={clearCache}
-          disabled={isClearing}
-        >
+        <ActionButton onClick={clearCache} disabled={isClearing}>
           {isClearing ? (
             <>
               <LoadingSpinner />
               正在清除缓存...
             </>
           ) : (
-            <>
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M21 12a9 9 0 0 0-9-9M3 12a9 9 0 0 1 9-9M21 12a9 9 0 0 1-9 9M3 12a9 9 0 0 0 9 9" />
-              </svg>
-              清除应用缓存
-            </>
+            "清除应用缓存"
           )}
+        </ActionButton>
+        <ActionButton
+          onClick={handleResetSettings}
+          className={showResetConfirm ? "confirming" : ""}
+        >
+          {showResetConfirm ? "再次点击确认重置" : "恢复默认设置"}
+        </ActionButton>
+
+        <ActionButton
+          variant="danger"
+          onClick={clearData}
+          className={showClearDataConfirm ? "confirming" : ""}
+        >
+          {showClearDataConfirm ? "再次点击确认删除所有录音" : "删除所有录音"}
         </ActionButton>
       </ActionSection>
     </Modal>

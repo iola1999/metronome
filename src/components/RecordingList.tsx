@@ -10,7 +10,7 @@ interface RecordingListProps {
   recordings: Recording[];
   isOpen: boolean;
   onClose: () => void;
-  onDelete: (id: number) => Promise<void>;
+  onDelete: (id: number) => Promise<boolean>;
   playingId: number | null;
   isPlaying: boolean;
   onPlayToggle: (recording: Recording) => void;

@@ -13,6 +13,7 @@ import {
   ProgressFill,
 } from "../styles/components/RecordingStyles";
 import { IconButton } from "../styles/components";
+import { message } from "./Message";
 
 interface RecordingItemProps {
   recording: Recording;
@@ -20,7 +21,7 @@ interface RecordingItemProps {
   playProgress: number;
   playingId: number | null;
   onPlayToggle: (recording: Recording) => void;
-  onDelete: (id: number) => Promise<void>;
+  onDelete: (id: number) => Promise<boolean>;
 }
 
 export const RecordingItem = ({
@@ -39,7 +40,7 @@ export const RecordingItem = ({
     if (showDeleteConfirm) {
       timer = window.setTimeout(() => {
         setShowDeleteConfirm(false);
-      }, 5000);
+      }, 3000);
     }
     return () => {
       if (timer) clearTimeout(timer);
@@ -54,9 +55,16 @@ export const RecordingItem = ({
       return;
     }
 
-    setIsDeleting(true);
-    setShowDeleteConfirm(false);
-    await onDelete(recording.id);
+    try {
+      setIsDeleting(true);
+      setShowDeleteConfirm(false);
+      await onDelete(recording.id);
+      message.success("录音已删除");
+    } catch (err) {
+      console.error("删除录音失败:", err);
+      message.error("删除录音失败，请重试");
+      setIsDeleting(false);
+    }
   };
 
   const formatDate = (date: Date) => {

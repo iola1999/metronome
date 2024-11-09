@@ -10,14 +10,20 @@ import { App } from '../App';
     <title>节拍器 - 支持录音的在线节拍器</title>
     
     <!-- PWA 相关 -->
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="节拍器" />
+    <meta name="application-name" content="节拍器" />
     
-    <!-- 其他 meta 标签保持不变 -->
+    <!-- SEO -->
+    <meta name="description" content="一个支持录音的在线节拍器，可调节速度并保存录音。支持 PWA 安装，可离线使用。" />
+    <meta name="theme-color" content="#007AFF" />
+    <meta name="color-scheme" content="light" />
     
     <!-- favicon -->
     <link rel="icon" href="/icons/icon.png" />
+    <link rel="mask-icon" href="/icons/icon.png" color="#007AFF" />
     
     <!-- iOS 图标 -->
     <link rel="apple-touch-icon" href="/icons/icon.png" />
