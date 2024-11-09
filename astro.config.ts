@@ -37,8 +37,6 @@ export default defineConfig({
       basicSsl(),
       VitePWA({
         registerType: "autoUpdate",
-        injectRegister: "auto",
-        strategies: "injectManifest",
         manifest: {
           name: "节拍器 - 支持录音的在线节拍器",
           short_name: "节拍器",
@@ -82,10 +80,16 @@ export default defineConfig({
           related_applications: [],
           prefer_related_applications: false,
         },
+        workbox: {
+          globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,jpg,jpeg,json}"],
+          runtimeCaching: [],
+        },
         devOptions: {
           enabled: true,
           type: "module",
+          navigateFallback: "index.html",
         },
+        includeAssets: ["favicon.ico", "apple-touch-icon.png", "mask-icon.svg"],
       }),
     ],
     server: {
