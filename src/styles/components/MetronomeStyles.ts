@@ -7,18 +7,18 @@ export const Controls = styled.div`
 `;
 
 export const PendulumContainer = styled.div`
-  height: 200px;
+  height: 160px;
   width: 100%;
   position: relative;
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  padding-top: 40px;
+  padding-top: 20px;
 `;
 
 export const PendulumArm = styled.div`
   width: 4px;
-  height: 120px;
+  height: 100px;
   background: linear-gradient(to right, #666666, #999999, #666666);
   position: absolute;
   bottom: 10px;
@@ -30,10 +30,10 @@ export const PendulumArm = styled.div`
 
 export const PendulumBob = styled.div`
   width: 24px;
-  height: 40px;
+  height: 36px;
   position: absolute;
   left: 50%;
-  bottom: 120px;
+  bottom: 100px;
   transform: translateX(-50%);
   background: linear-gradient(to right,
     #d0d0d0,
@@ -154,15 +154,15 @@ export const Beat = styled.div<{ active?: boolean; firstBeat?: boolean }>`
 `;
 
 export const TempoControl = styled.div`
-  padding: ${({ theme }) => `${theme.spacing.xs} ${theme.spacing.md}`};
-  margin: ${({ theme }) => `${theme.spacing.xs} -${theme.spacing.md}`};
+  padding: ${({ theme }) => `${theme.spacing.xs} ${theme.spacing.sm}`};
+  margin: ${({ theme }) => `${theme.spacing.xs} -${theme.spacing.sm}`};
   touch-action: none;
 `;
 
 export const TempoSlider = styled.input`
   -webkit-appearance: none;
   width: 100%;
-  height: 40px;
+  height: 32px;
   background: transparent;
   padding: 0;
   margin: 0;
@@ -178,12 +178,12 @@ export const TempoSlider = styled.input`
 
   &::-webkit-slider-thumb {
     -webkit-appearance: none;
-    height: 32px;
-    width: 32px;
+    height: 28px;
+    width: 28px;
     border-radius: ${({ theme }) => theme.borderRadius.full};
     background: ${({ theme }) => theme.colors.accent};
     cursor: pointer;
-    margin-top: -12px;
+    margin-top: -10px;
     box-shadow: ${({ theme }) => theme.shadows.sm};
     border: 2px solid white;
     transition: transform 0.2s ease;
@@ -206,7 +206,7 @@ export const TempoPresets = styled.div`
 `;
 
 export const PresetButton = styled.button<{ isSelected?: boolean }>`
-  padding: 8px 16px;
+  padding: 6px 12px;
   font-size: 1rem;
   border: none;
   background: ${props => props.isSelected ? '#007AFF' : '#f0f0f0'};
