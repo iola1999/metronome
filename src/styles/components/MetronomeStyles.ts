@@ -43,6 +43,7 @@ export const PendulumArm = styled.div`
   bottom: 0;
   transform-origin: bottom center;
   box-shadow: -1px 0 1px rgba(255, 255, 255, 0.5), 1px 0 1px rgba(0, 0, 0, 0.3);
+  border-radius: 2px;
 `;
 
 export const PendulumBob = styled.div`
