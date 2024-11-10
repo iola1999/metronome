@@ -14,6 +14,7 @@ import {
   TempoPresets,
   PresetButton,
   TempoNumber,
+  CenterLine,
 } from "../styles/components/MetronomeStyles";
 import { Button } from "../styles/components";
 import { useSettingsStore } from "../store/settings";
@@ -43,7 +44,7 @@ const METRONOME_CONFIG = {
   },
   PENDULUM: {
     MIN_POS: 40,
-    MAX_POS: 100,
+    MAX_POS: 110,
   },
 } as const;
 
@@ -265,6 +266,7 @@ export const Metronome = ({ isPlaying, onPlayingChange }: MetronomeProps) => {
   return (
     <Controls style={{ visibility: isLoaded ? "visible" : "hidden" }}>
       <PendulumContainer>
+        <CenterLine />
         <Pendulum
           className={isPendulumActive ? "active" : ""}
           style={

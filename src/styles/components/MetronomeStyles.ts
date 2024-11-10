@@ -13,19 +13,36 @@ export const PendulumContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  padding-top: 20px;
+  padding-bottom: 0;
+`;
+
+// 新增参考线组件
+export const CenterLine = styled.div`
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: ${({ theme }) => `${theme.colors.border}40`};
+  z-index: 0;
+  pointer-events: none;
 `;
 
 export const PendulumArm = styled.div`
   width: 4px;
-  height: 100px;
-  background: linear-gradient(to right, #666666, #999999, #666666);
+  height: 140px;
+  background: linear-gradient(
+    to right,
+    #666666,
+    #999999 20%,
+    #cccccc 50%,
+    #999999 80%,
+    #666666
+  );
   position: absolute;
-  bottom: 10px;
+  bottom: 0;
   transform-origin: bottom center;
-  box-shadow: 
-    -1px 0 1px rgba(255, 255, 255, 0.5),
-    1px 0 1px rgba(0, 0, 0, 0.3);
+  box-shadow: -1px 0 1px rgba(255, 255, 255, 0.5), 1px 0 1px rgba(0, 0, 0, 0.3);
 `;
 
 export const PendulumBob = styled.div`
@@ -33,9 +50,9 @@ export const PendulumBob = styled.div`
   height: 36px;
   position: absolute;
   left: 50%;
-  bottom: 100px;
   transform: translateX(-50%);
-  background: linear-gradient(to right,
+  background: linear-gradient(
+    to right,
     #d0d0d0,
     #e8e8e8 20%,
     #f5f5f5 40%,
@@ -43,21 +60,28 @@ export const PendulumBob = styled.div`
     #d0d0d0 100%
   );
   border: 1px solid #999;
-  box-shadow: 
-    inset -1px -1px 2px rgba(0, 0, 0, 0.2),
-    inset 1px 1px 2px rgba(255, 255, 255, 0.3),
-    2px 2px 4px rgba(0, 0, 0, 0.1);
-  
+  border-radius: 2px;
+  box-shadow: inset -1px -1px 2px rgba(0, 0, 0, 0.2),
+    inset 1px 1px 2px rgba(255, 255, 255, 0.3), 2px 2px 4px rgba(0, 0, 0, 0.1);
+
   // 添加刻度线效果
-  &::before {
-    content: '';
+  &::before,
+  &::after {
+    content: "";
     position: absolute;
     left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%);
     width: 16px;
-    height: 2px;
+    height: 1px;
     background: #999;
+  }
+
+  &::before {
+    top: 33%;
+  }
+
+  &::after {
+    top: 66%;
   }
 `;
 
@@ -69,17 +93,24 @@ export const Pendulum = styled.div`
   justify-content: center;
   transform-origin: bottom center;
   transition: transform 0.3s ease-out;
+  z-index: 1;
 
   &.active {
     transition: none;
     animation: swing calc(120s / var(--tempo)) infinite;
-    animation-timing-function: cubic-bezier(0.4, 0.0, 0.6, 1.0);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
   }
 
   @keyframes swing {
-    0% { transform: rotate(calc(min(40deg, 30deg * (120 / var(--tempo))))); }
-    50% { transform: rotate(calc(max(-40deg, -30deg * (120 / var(--tempo))))); }
-    100% { transform: rotate(calc(min(40deg, 30deg * (120 / var(--tempo))))); }
+    0% {
+      transform: rotate(calc(min(40deg, 30deg * (120 / var(--tempo)))));
+    }
+    50% {
+      transform: rotate(calc(max(-40deg, -30deg * (120 / var(--tempo)))));
+    }
+    100% {
+      transform: rotate(calc(min(40deg, 30deg * (120 / var(--tempo)))));
+    }
   }
 `;
 
@@ -209,8 +240,8 @@ export const PresetButton = styled.button<{ isSelected?: boolean }>`
   padding: 6px 12px;
   font-size: 1rem;
   border: none;
-  background: ${props => props.isSelected ? '#007AFF' : '#f0f0f0'};
-  color: ${props => props.isSelected ? 'white' : 'black'};
+  background: ${(props) => (props.isSelected ? "#007AFF" : "#f0f0f0")};
+  color: ${(props) => (props.isSelected ? "white" : "black")};
   border-radius: 4px;
   cursor: pointer;
   transition: transform 0.2s;
